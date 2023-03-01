@@ -2,10 +2,12 @@
   "name": "termtran",
   "version": "1.0.0",
   "description": "A CLI to translate between languages in the terminal",
-  "main": "dist/core/index.js",
-  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
-    "dev": "tsc && concurrently -k -n \"Typescript,Node\" -p \"[{name}]\" -c \"blue,green\" \"tsc --watch\" \"nodemon dist/index.js\"",
+    "dev": "tsc && concurrently -k -n \"Typescript,Node\" -p \"[{name}]\" -c \"blue,green\" \"tsc --watch\" \"nodemon dist/test/main.js\"",
     "test": "npx jest",
     "test-watch": "npx jest watch"
   },

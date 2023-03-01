@@ -1,15 +1,10 @@
-import { Argument, Command } from "commander";
-import { ArgumentOption } from "../interfaces";
-import {
-  appInfo,
-  argumentValidator,
-  processArgument,
-  processHandler,
-} from "../helpers";
+import { Command } from "commander";
+import { appInfo, processArgument, processHandler } from "../helpers";
+import { ArgumentType } from "../interfaces";
 
 export function App(context?: {
   commands?: Array<any>;
-  arguments?: Array<ArgumentOption>;
+  arguments?: Array<ArgumentType>;
   version?: string;
   usage?: string;
   description?: string;
@@ -52,7 +47,7 @@ export function App(context?: {
 
       const args = processArgument(context?.arguments, program);
       program.action((...arg: any) => processHandler(args, program, this));
-      originalInitFunction.call(this);
+      originalInitFunction.call(this, program);
     };
   };
 }

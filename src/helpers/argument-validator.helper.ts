@@ -1,5 +1,4 @@
-import { ArgumentOption } from "../interfaces/argument-option.interface";
-export const argumentValidator = (value: any, argument: ArgumentOption) => {
+export const argumentValidator = (value: any, argument: any) => {
   switch (argument.type) {
     case "number":
       if (!Number.isInteger(parseInt(value)))
@@ -14,7 +13,6 @@ export const argumentValidator = (value: any, argument: ArgumentOption) => {
     case "date":
       if (!/^.+[\/|\-].+$/.test(value) || Number.isNaN(Date.parse(value)))
         throw new Error(`'${argument.name}' argument must be a date`);
-
       value = new Date(value);
       break;
   }

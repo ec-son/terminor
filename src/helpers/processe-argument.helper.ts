@@ -1,11 +1,11 @@
 import { Argument, Command } from "commander";
-import { ArgumentOption } from "../interfaces";
-import { argumentValidator } from "../helpers";
+import { ArgumentType } from "../interfaces";
+import { argumentValidator } from ".";
 
 export const processArgument = (
-  args: Array<ArgumentOption> | undefined,
+  args: Array<ArgumentType> | undefined,
   command: Command
-): Array<ArgumentOption> => {
+): Array<ArgumentType> => {
   if (!args?.length) args = [];
   args.forEach((argument) => {
     const dateDesc =
