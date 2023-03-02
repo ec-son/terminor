@@ -1,4 +1,5 @@
 import { App, Option } from "..";
+import { GenerateCommand } from "./generate.commande";
 
 @App({
   description: "New command cli",
@@ -8,7 +9,9 @@ import { App, Option } from "..";
       name: "name",
       description: "The name of the command",
       // required: true,
-      type: "string",
+      type: "number",
+      choices: ["asd", "cfd", "bds"],
+      defeault: 7,
     },
     {
       name: "file",
@@ -17,14 +20,17 @@ import { App, Option } from "..";
       type: "string",
     },
   ],
+  commands: [GenerateCommand],
 })
 export class AppCommand {
-  @Option({
-    name: "-n, --name",
-    description: "The name of the command",
-    type: "number",
-    required: true,
-  })
+  // @Option({
+  //   name: "-n, --name",
+  //   description: "The name of the command",
+  //   type: "number",
+  //   required: true,
+  //   choices: [1, 2, 3, 4],
+  //   defeault: 3,
+  // })
   private name;
   handler(obj) {
     console.log("==================================");

@@ -11,7 +11,8 @@ export const processArgument = (
     const dateDesc =
       argument.type === "date" ? "  (e.g. YYYY-MM-DD = 2015-02-31)." : "";
     const newArg = new Argument(argument.name, argument.description + dateDesc);
-    if (argument.defeault) newArg.default(argument.defeault);
+    if (argument.defeault && typeof argument.defeault === argument.type)
+      newArg.default(argument.defeault);
     newArg.required = argument.required || false;
 
     newArg.argParser((value: any) => argumentValidator(value, argument));

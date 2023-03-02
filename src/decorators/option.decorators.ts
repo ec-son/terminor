@@ -8,6 +8,13 @@ export function Option(_opt: OptionType) {
     target.init = function (program: Command) {
       const option = { ..._opt, propertyName };
       const newOption = new _O(option.name, option.description);
+
+      if (option.long) newOption.long = option.long;
+      if (option.short) newOption.short = option.short;
+      if (option.defeault && typeof option.defeault === option.type)
+        newOption.default(option.defeault);
+      if (option.choices) newOption.choices(option.choices);
+
       if (
         option?.type &&
         ["string", "number", "float", "date"].includes(option.type)
@@ -16,11 +23,14 @@ export function Option(_opt: OptionType) {
           ? (newOption.required = true)
           : (newOption.optional = true);
       }
-      newOption.argParser((value: any) => argumentValidator(value, option));
+
+      newOption.argParser((value: any) =>
+        argumentValidator(value, option, "opt")
+      );
       program.addOption(newOption);
-      this.opts && Array.isArray(this.opts)
-        ? this.opts.push(option)
-        : (this.opts = [option]);
+      this._opts && Array.isArray(this._opts)
+        ? this._opts.push(option)
+        : (this._opts = [option]);
 
       originalInitFunction.call(this, program);
     };

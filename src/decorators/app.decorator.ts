@@ -1,6 +1,12 @@
 import { Command } from "commander";
-import { appInfo, processArgument, processHandler } from "../helpers";
+import {
+  appInfo,
+  processArgument,
+  processCommand,
+  processHandler,
+} from "../helpers";
 import { ArgumentType } from "../interfaces";
+import { KsError } from "../exceptions/ks-error";
 
 export function App(context?: {
   commands?: Array<any>;
@@ -24,7 +30,10 @@ export function App(context?: {
 
     target.prototype.init = function (program: Command) {
       if (program instanceof Command == false)
-        throw new Error(`Command class is expected but got ${typeof program}`);
+        throw new KsError(
+          `Command class is expected but got ${typeof program}`,
+          { type: "error" }
+        );
 
       const appName = context?.commandName || appInfo("name");
       const version = context?.version || appInfo("version");
@@ -35,18 +44,11 @@ export function App(context?: {
       if (description) program.description(description);
       if (context?.usage) program.usage(context?.usage);
 
-      const commands = context?.commands || [];
-
-      const commandInstances = [];
-
-      commands.forEach((command) => {
-        const commandInstance = new Command();
-
-        program.addCommand(commandInstance);
-      });
-
       const args = processArgument(context?.arguments, program);
       program.action((...arg: any) => processHandler(args, program, this));
+      processCommand(context?.commands, program);
+
+      if (!this._opts || Array.isArray(this._opts)) this._opts = [];
       originalInitFunction.call(this, program);
     };
   };
