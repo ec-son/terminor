@@ -11,7 +11,7 @@ import { GenerateCommand } from "./generate.commande";
       // required: true,
       type: "number",
       choices: ["asd", "cfd", "bds"],
-      defeault: 7,
+      default: 7,
     },
     {
       name: "file",

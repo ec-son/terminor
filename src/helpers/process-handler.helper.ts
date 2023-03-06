@@ -12,15 +12,19 @@ export const processHandler = (
 
   opts.forEach((opt) => {
     const key = Object.keys(optsData).find((key) => opt.name.includes(key));
+    console.log(optsData);
+    console.log(key);
 
     if (
       !opt.required &&
       opt.type &&
       ["string", "number", "float", "date"].includes(opt.type) &&
       (!key || typeof optsData[key] === "boolean")
-    )
-      _command[opt.propertyName] = undefined;
-    else if (
+    ) {
+      if (key && typeof optsData[key] === "boolean" && opt.default)
+        _command[opt.propertyName] = opt.default;
+      else _command[opt.propertyName] = undefined;
+    } else if (
       opt.required &&
       opt.type &&
       ["string", "number", "float", "date"].includes(opt.type) &&

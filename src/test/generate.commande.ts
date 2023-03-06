@@ -2,11 +2,20 @@ import { Command, Option } from "../decorators";
 
 @Command({
   commandName: "generate",
+  alias: "g",
+  arguments: [
+    {
+      name: "filename",
+      type: "string",
+      description: "Filename to generate",
+    },
+  ],
 })
 export class GenerateCommand {
   @Option({
     name: "-g, --gen",
     type: "number",
+    default: 1,
   })
   gen: boolean;
 
