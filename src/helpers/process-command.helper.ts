@@ -7,7 +7,6 @@ export const processCommand = (
 
   commands.forEach((command) => {
     const commandInstance = new Command();
-
     const _commandInstance = new command();
 
     _commandInstance.init(commandInstance);

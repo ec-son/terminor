@@ -17,6 +17,7 @@ export function Command(context: CommandType) {
       program.name(context.commandName);
       if (context.description) program.description(context.description);
       if (context.usage) program.usage(context.usage);
+      if (context.alias) program.alias(context.alias);
 
       const args = processArgument(context?.arguments, program);
       program.action((...arg: any) => processHandler(args, program, this));

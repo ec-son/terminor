@@ -10,4 +10,5 @@ export interface CommandType {
     name?: string;
     alias?: string;
   };
+  alias?: string;
 }
