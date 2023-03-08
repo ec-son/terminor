@@ -1,4 +1,4 @@
-import { App, Option } from "..";
+import { App } from "..";
 import { GenerateCommand } from "./generate.commande";
 
 @App({

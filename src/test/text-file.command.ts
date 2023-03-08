@@ -1,19 +1,17 @@
-import { ServiceCommand } from "./service.commande";
 import { Command, Option } from "../decorators";
 
 @Command({
-  commandName: "generate",
-  alias: "g",
+  commandName: "text-file",
+  alias: "t",
   arguments: [
     {
-      name: "filename",
+      name: "name",
       type: "string",
-      description: "Filename to generate",
+      description: "name of text file",
     },
   ],
-  commands: [ServiceCommand],
 })
-export class GenerateCommand {
+export class TextFileCommand {
   @Option({
     name: "-g, --gen",
     type: "number",
@@ -22,11 +20,11 @@ export class GenerateCommand {
   gen: boolean;
 
   handler(obj) {
-    console.log("==================================");
     console.log(
-      "🚀 ~ file: app.comand.ts:18 ~ AppComponent ~ handler ~ obj:",
+      "🚀 ~ file: text-file.command.ts:24 ~ TextFileCommand ~ handler ~ obj:",
       obj
     );
+    console.log("==================================");
 
     console.log("======================");
 
