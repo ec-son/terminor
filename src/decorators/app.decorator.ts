@@ -25,6 +25,7 @@ export function App(context?: {
   };
 }) {
   return function (target: Function) {
+    target["_commandList"] = [];
     const originalInitFunction: Function =
       target.prototype.init || function () {};
 
@@ -46,7 +47,7 @@ export function App(context?: {
 
       const args = processArgument(context?.arguments, program);
       program.action((...arg: any) => processHandler(args, program, this));
-      processCommand(context?.commands, program);
+      processCommand(context?.commands, program, target);
 
       if (!this._opts || Array.isArray(this._opts)) this._opts = [];
       originalInitFunction.call(this, program);
