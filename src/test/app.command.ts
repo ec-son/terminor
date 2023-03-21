@@ -1,3 +1,4 @@
+import { TextFileCommand } from "./text-file.command";
 import { App } from "..";
 import { GenerateCommand } from "./generate.commande";
 
@@ -20,7 +21,7 @@ import { GenerateCommand } from "./generate.commande";
       type: "string",
     },
   ],
-  commands: [GenerateCommand],
+  commands: [GenerateCommand, TextFileCommand],
 })
 export class AppCommand {
   // @Option({

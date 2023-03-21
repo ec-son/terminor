@@ -1,3 +1,5 @@
+import { ServiceCommand } from "./service.commande";
+import { GenerateCommand } from "./generate.commande";
 import { Command, Option } from "../decorators";
 
 @Command({
@@ -10,6 +12,7 @@ import { Command, Option } from "../decorators";
       description: "name of text file",
     },
   ],
+  // commands: [GenerateCommand],
 })
 export class TextFileCommand {
   @Option({

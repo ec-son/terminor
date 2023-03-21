@@ -1,7 +1,7 @@
 // import { Argument, Option, program } from "commander";
 import { Cli } from "./../";
 import { AppCommand } from "./app.command";
-const cli = new Cli(new AppCommand());
+const cli = new Cli(AppCommand);
 cli.run();
 
 // const arg = new Argument("name");

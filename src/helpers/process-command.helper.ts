@@ -1,3 +1,4 @@
+import { commandContainer } from "./../tools/command-container";
 import { KsError } from "./../exceptions/ks-error";
 import { Command } from "commander";
 export const processCommand = (
@@ -6,13 +7,19 @@ export const processCommand = (
   target: Function
 ) => {
   if (!commands?.length) commands = [];
+  console.log("-------------------------------------");
+  console.log(target.name);
+  console.log(commands);
 
   commands.forEach((command) => {
-    if (typeof command !== "function")
+    if (typeof command !== "function") {
+      console.log(command);
+
       throw new KsError(
         `We got anexpected Class in array of ${target.name} subcommands.`,
         { type: "error" }
       );
+    }
 
     if (command === target)
       throw new KsError(`${target.name} command calls itself.`, {
@@ -20,6 +27,15 @@ export const processCommand = (
       });
 
     if ((target["_commandList"] as Array<any>).find((el) => el === command)) {
+      // console.log("++++++++++++++++++++++++++++++++");
+
+      // console.log(target);
+      // console.log(command);
+      // console.log(commands);
+
+      // console.log("++++++++++++++++++++++++++++++++");
+      console.log(commandContainer);
+
       throw new KsError(
         `Thow commands called each other several times. '${target.name}' => '${
           (command as Function).name
@@ -30,13 +46,22 @@ export const processCommand = (
 
     (target["_commandList"] as Array<any>).push(command);
   });
-  console.log(target["_commandList"]);
 
   commands.forEach((command) => {
-    const commandInstance = new Command();
-    const _commandInstance = new command();
+    const controllerInstances = commandContainer.getCommand(command.name);
 
-    _commandInstance.init(commandInstance);
-    program.addCommand(commandInstance);
+    if (controllerInstances)
+      program.addCommand(controllerInstances.commandInstance);
+    else {
+      const commandInstance = new Command();
+      const controllerInstance = new command();
+      commandContainer.setCommand({
+        commandInstance: commandInstance,
+        controllerInstance: controllerInstance,
+        name: command.name,
+      });
+      controllerInstance.init(commandInstance);
+      program.addCommand(commandInstance);
+    }
   });
 };
