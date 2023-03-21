@@ -12,7 +12,7 @@ import { TextFileCommand } from "./text-file.command";
       description: "name of service to generatee",
     },
   ],
-  commands: [TextFileCommand],
+  // commands: [GenerateCommand],
 })
 export class ServiceCommand {
   @Option({

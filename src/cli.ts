@@ -1,8 +1,16 @@
+import { commandContainer } from "./tools/command-container";
 import { program } from "commander";
 
 export class Cli {
-  constructor(appComponent: any) {
-    appComponent.init(program);
+  constructor(AppComponent: any) {
+    const app = new AppComponent();
+    commandContainer.setCommand({
+      commandInstance: program,
+      controllerInstance: app,
+      name: AppComponent.name,
+    });
+
+    app.init(program);
   }
 
   run() {
