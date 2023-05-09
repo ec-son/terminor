@@ -1,6 +1,7 @@
-import { commandContainer } from "./../tools/command-container";
-import { KsError } from "./../exceptions/ks-error";
+import { commandContainer } from "./command-container";
+import { KsError } from "../exceptions/ks-error";
 import { Command } from "commander";
+
 export const processCommand = (
   commands: Array<any> | undefined,
   program: Command,
@@ -10,6 +11,7 @@ export const processCommand = (
   console.log("-------------------------------------");
   console.log(target.name);
   console.log(commands);
+  // console.log(commandContainer);
 
   commands.forEach((command) => {
     if (typeof command !== "function") {
@@ -59,6 +61,8 @@ export const processCommand = (
         commandInstance: commandInstance,
         controllerInstance: controllerInstance,
         name: command.name,
+        subCommandIndex: Symbol(),
+        commandNameIndex: Symbol(),
       });
       controllerInstance.init(commandInstance);
       program.addCommand(commandInstance);

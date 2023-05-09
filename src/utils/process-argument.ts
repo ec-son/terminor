@@ -1,6 +1,7 @@
 import { Argument, Command } from "commander";
-import { ArgumentType } from "../interfaces";
-import { argumentValidator } from ".";
+import { ArgumentType } from "../types";
+import { argumentValidator } from "./argument-validator";
+// import { argumentValidator } from "../helpers";
 
 export const processArgument = (
   args: Array<ArgumentType> | undefined,

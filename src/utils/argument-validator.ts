@@ -1,5 +1,5 @@
 import { KsError } from "../exceptions/ks-error";
-import { BaseOptionArgumentInterface } from "../interfaces/base-option-argument.interface";
+import { BaseOptionArgumentInterface } from "../types/base-option-argument.interface";
 
 export const argumentValidator = (
   value: any,

@@ -1,6 +1,7 @@
-import { TextFileCommand } from "./text-file.command";
-import { App } from "..";
 import { GenerateCommand } from "./generate.commande";
+import { ServiceCommand } from "./service.commande";
+import { TextFileCommand } from "./text-file.command";
+import { App, Command } from "../decorators";
 
 @App({
   description: "New command cli",
@@ -21,7 +22,15 @@ import { GenerateCommand } from "./generate.commande";
       type: "string",
     },
   ],
-  commands: [GenerateCommand, TextFileCommand],
+  subCommands: ["generate", "text-file", "service"],
+  commands: [
+    TextFileCommand,
+    ServiceCommand,
+    GenerateCommand,
+    // ServiceCommand,
+    // ServiceCommand,
+    // TextFileCommand,
+  ],
 })
 export class AppCommand {
   // @Option({
@@ -35,14 +44,8 @@ export class AppCommand {
   private name;
   handler(obj) {
     console.log("==================================");
-    console.log(
-      "🚀 ~ file: app.comand.ts:18 ~ AppComponent ~ handler ~ obj:",
-      obj
-    );
-    console.log("name option: ", this.name);
-    console.log("======================");
-
-    // console.log("handler: ", this.name1);
+    console.log("I'am at App Command");
+    console.log(obj);
   }
   init() {
     // console.log("init");

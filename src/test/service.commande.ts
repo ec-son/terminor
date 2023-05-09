@@ -12,7 +12,7 @@ import { TextFileCommand } from "./text-file.command";
       description: "name of service to generatee",
     },
   ],
-  // commands: [GenerateCommand],
+  subCommands: ["generate"],
 })
 export class ServiceCommand {
   @Option({
@@ -23,14 +23,8 @@ export class ServiceCommand {
   gen: boolean;
 
   handler(obj) {
-    console.log(
-      "🚀 ~ file: service.commande.ts:23 ~ ServiceCommand ~ handler ~ obj:",
-      obj
-    );
     console.log("==================================");
-
-    console.log("======================");
-
-    console.log("handler: ", this.gen);
+    console.log("I'am at Service Command");
+    console.log(obj);
   }
 }

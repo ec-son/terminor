@@ -1,6 +1,6 @@
 import { KsError } from "../exceptions/ks-error";
 import { Command } from "commander";
-import { ArgumentType, OptionType } from "../interfaces";
+import { ArgumentType, OptionType } from "../types";
 
 export const processHandler = (
   args: Array<ArgumentType>,
@@ -12,8 +12,6 @@ export const processHandler = (
 
   opts.forEach((opt) => {
     const key = Object.keys(optsData).find((key) => opt.name.includes(key));
-    console.log(optsData);
-    console.log(key);
 
     if (
       !opt.required &&

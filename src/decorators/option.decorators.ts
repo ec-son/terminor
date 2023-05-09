@@ -1,6 +1,6 @@
 import { Command, Option as _O } from "commander";
-import { argumentValidator } from "../helpers";
-import { OptionType } from "../interfaces";
+import { OptionType } from "../types";
+import { argumentValidator } from "../utils/argument-validator";
 
 export function Option(_opt: OptionType) {
   return function (target, propertyName: string) {
@@ -13,7 +13,9 @@ export function Option(_opt: OptionType) {
       if (option.short) newOption.short = option.short;
       if (option.default && typeof option.default === option.type)
         newOption.default(option.default);
-      else if (option.default) delete option.default;
+      else if (option.default) {
+        delete option.default;
+      }
       if (option.choices) newOption.choices(option.choices);
 
       if (
@@ -24,7 +26,6 @@ export function Option(_opt: OptionType) {
           ? (newOption.required = true)
           : (newOption.optional = true);
       }
-
       newOption.argParser((value: any) =>
         argumentValidator(value, option, "opt")
       );

@@ -12,7 +12,7 @@ import { Command, Option } from "../decorators";
       description: "Filename to generate",
     },
   ],
-  commands: [TextFileCommand],
+  subCommands: ["service"],
 })
 export class GenerateCommand {
   @Option({
@@ -24,13 +24,7 @@ export class GenerateCommand {
 
   handler(obj) {
     console.log("==================================");
-    console.log(
-      "🚀 ~ file: app.comand.ts:18 ~ AppComponent ~ handler ~ obj:",
-      obj
-    );
-
-    console.log("======================");
-
-    console.log("handler: ", this.gen);
+    console.log("I'am at Generate Command");
+    console.log(obj);
   }
 }
