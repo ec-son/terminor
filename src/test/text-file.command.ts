@@ -1,5 +1,3 @@
-import { ServiceCommand } from "./service.commande";
-import { GenerateCommand } from "./generate.commande";
 import { Command, Option } from "../decorators";
 
 @Command({
@@ -8,29 +6,29 @@ import { Command, Option } from "../decorators";
   arguments: [
     {
       name: "name",
-      type: "string",
+      type: Number,
+      // choices: ["red", "blue", "green", "yellow", "orange"],
+      choices: [12, 34, 5, 6],
+      default: 12,
       description: "name of text file",
     },
   ],
-  // commands: [GenerateCommand],
+  subCommands: ["generate", "service"],
 })
 export class TextFileCommand {
   @Option({
     name: "-g, --gen",
-    type: "number",
-    default: 1,
+    type: Number,
+    choices: [0, 5],
+    default: 5,
+    // required: true,
   })
   gen: boolean;
 
   handler(obj) {
-    console.log(
-      "🚀 ~ file: text-file.command.ts:24 ~ TextFileCommand ~ handler ~ obj:",
-      obj
-    );
     console.log("==================================");
-
-    console.log("======================");
-
-    console.log("handler: ", this.gen);
+    console.log("I'am at Text-File Command");
+    console.log(obj);
+    console.log(this.gen);
   }
 }

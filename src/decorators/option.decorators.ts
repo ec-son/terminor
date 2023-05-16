@@ -1,6 +1,9 @@
 import { Command, Option as _O } from "commander";
-import { argumentValidator } from "../helpers";
-import { OptionType } from "../interfaces";
+import { KsError } from "../exceptions/ks-error";
+import { OptionType, ValidType } from "../types";
+import { argumentValidator } from "../utils/argument-validator";
+import { choiceVerifing } from "../utils/choice-verification";
+import { commandContainer } from "../utils/command-container";
 
 export function Option(_opt: OptionType) {
   return function (target, propertyName: string) {
@@ -11,20 +14,39 @@ export function Option(_opt: OptionType) {
 
       if (option.long) newOption.long = option.long;
       if (option.short) newOption.short = option.short;
-      if (option.default && typeof option.default === option.type)
+
+      const commandName = commandContainer.getCommand(this)?.name;
+
+      choiceVerifing(option.type, option.choices || [], "choice", commandName);
+      if (option.default) {
+        if (
+          option?.choices &&
+          option?.choices?.length > 0 &&
+          !option.choices.includes(option.default)
+        ) {
+          throw new KsError(
+            `The default value provided is not valid according to the available choices. Valid choices are: ${option.choices.join(
+              ", "
+            )}`,
+            {
+              type: "error",
+              errorType: "InvalidDefaultValueError",
+              commandName,
+            }
+          );
+        }
+        choiceVerifing(option.type, [option.default], "default", commandName);
         newOption.default(option.default);
-      else if (option.default) delete option.default;
-      if (option.choices) newOption.choices(option.choices);
+      }
 
       if (
         option?.type &&
-        ["string", "number", "float", "date"].includes(option.type)
+        ([Number, String, Date] as Array<ValidType>).includes(option?.type)
       ) {
         option.required
           ? (newOption.required = true)
           : (newOption.optional = true);
       }
-
       newOption.argParser((value: any) =>
         argumentValidator(value, option, "opt")
       );

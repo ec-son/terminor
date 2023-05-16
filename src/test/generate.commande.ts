@@ -8,29 +8,23 @@ import { Command, Option } from "../decorators";
   arguments: [
     {
       name: "filename",
-      type: "string",
+      type: String,
       description: "Filename to generate",
     },
   ],
-  commands: [TextFileCommand],
+  subCommands: ["service"],
 })
 export class GenerateCommand {
   @Option({
     name: "-g, --gen",
-    type: "number",
+    type: Number,
     default: 1,
   })
   gen: boolean;
 
   handler(obj) {
     console.log("==================================");
-    console.log(
-      "🚀 ~ file: app.comand.ts:18 ~ AppComponent ~ handler ~ obj:",
-      obj
-    );
-
-    console.log("======================");
-
-    console.log("handler: ", this.gen);
+    console.log("I'am at Generate Command");
+    console.log(obj);
   }
 }

@@ -8,29 +8,23 @@ import { TextFileCommand } from "./text-file.command";
   arguments: [
     {
       name: "name",
-      type: "string",
+      type: String,
       description: "name of service to generatee",
     },
   ],
-  // commands: [GenerateCommand],
+  subCommands: ["generate"],
 })
 export class ServiceCommand {
   @Option({
     name: "-g, --gen",
-    type: "number",
+    type: Number,
     default: 1,
   })
   gen: boolean;
 
   handler(obj) {
-    console.log(
-      "🚀 ~ file: service.commande.ts:23 ~ ServiceCommand ~ handler ~ obj:",
-      obj
-    );
     console.log("==================================");
-
-    console.log("======================");
-
-    console.log("handler: ", this.gen);
+    console.log("I'am at Service Command");
+    console.log(obj);
   }
 }
