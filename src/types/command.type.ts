@@ -1,4 +1,4 @@
-import { ArgumentType } from "./argument.interface";
+import { ArgumentType } from "./argument.type";
 
 export interface CommandType {
   commandName: string; // Set the name of the command

@@ -31,7 +31,7 @@ export function App(context?: {
     target.prototype.init = function (program: Command) {
       if (program instanceof Command == false)
         throw new KsError(
-          `Command class is expected but got ${typeof program}`,
+          `Expected a command class, but received a different type: ${typeof program}`,
           { type: "error" }
         );
 
@@ -49,7 +49,7 @@ export function App(context?: {
         if (!commandNameIndex)
           throw new KsError(
             `An error occurred during the initialization of the 'app' command : '${target.name}'. Please check your code and try again.`,
-            { type: "error", typeError: "CommandInitializationError" }
+            { type: "error", errorType: "CommandInitializationError" }
           );
 
         this[commandNameIndex] = appName;
@@ -69,7 +69,7 @@ export function App(context?: {
       if (description) program.description(description);
       if (context?.usage) program.usage(context?.usage);
 
-      const args = processArgument(context?.arguments, program);
+      const args = processArgument(context?.arguments, program, target.name);
       program.action((...arg: any) => processHandler(args, program, this));
 
       const subCommands = [...new Set(context?.subCommands)];
@@ -83,7 +83,7 @@ export function App(context?: {
         if (!subCommandIndex)
           throw new KsError(
             `An error occurred during the initialization of the 'app' command : '${target.name}'. Please check your code and try again.`,
-            { type: "error", typeError: "CommandInitializationError" }
+            { type: "error", errorType: "CommandInitializationError" }
           );
 
         this[subCommandIndex] = subCommands;

@@ -1,6 +1,6 @@
 import { KsError } from "../exceptions/ks-error";
 import { Command } from "commander";
-import { ArgumentType, OptionType } from "../types";
+import { ArgumentType, OptionType, ValidType } from "../types";
 
 export const processHandler = (
   args: Array<ArgumentType>,
@@ -16,7 +16,7 @@ export const processHandler = (
     if (
       !opt.required &&
       opt.type &&
-      ["string", "number", "float", "date"].includes(opt.type) &&
+      ([Number, String, Date] as Array<ValidType>).includes(opt.type) &&
       (!key || typeof optsData[key] === "boolean")
     ) {
       if (key && typeof optsData[key] === "boolean" && opt.default)
@@ -25,7 +25,7 @@ export const processHandler = (
     } else if (
       opt.required &&
       opt.type &&
-      ["string", "number", "float", "date"].includes(opt.type) &&
+      ([Number, String, Date] as Array<ValidType>).includes(opt.type) &&
       (!key || typeof optsData[key] === "boolean")
     )
       throw new KsError(`option ${opt.name} argument missing`, {

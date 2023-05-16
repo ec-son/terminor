@@ -1,7 +1,7 @@
 import { GenerateCommand } from "./generate.commande";
 import { ServiceCommand } from "./service.commande";
 import { TextFileCommand } from "./text-file.command";
-import { App, Command } from "../decorators";
+import { App, Command, Option } from "../decorators";
 
 @App({
   description: "New command cli",
@@ -11,15 +11,15 @@ import { App, Command } from "../decorators";
       name: "name",
       description: "The name of the command",
       // required: true,
-      type: "number",
-      choices: ["asd", "cfd", "bds"],
-      default: 7,
+      type: String,
+      // choices: ["asd", "cfd", "bds"],
+      default: "12",
     },
     {
       name: "file",
       description: "The name of the command",
       // required: true,
-      type: "string",
+      type: String,
     },
   ],
   subCommands: ["generate", "text-file", "service"],
@@ -33,14 +33,14 @@ import { App, Command } from "../decorators";
   ],
 })
 export class AppCommand {
-  // @Option({
-  //   name: "-n, --name",
-  //   description: "The name of the command",
-  //   type: "number",
-  //   required: true,
-  //   choices: [1, 2, 3, 4],
-  //   defeault: 3,
-  // })
+  @Option({
+    name: "-n, --name",
+    description: "The name of the command",
+    type: Number,
+    required: true,
+    // choices: [1, 2, 3],
+    default: 31,
+  })
   private name;
   handler(obj) {
     console.log("==================================");

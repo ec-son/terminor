@@ -1,21 +1,49 @@
 import { Argument, Command } from "commander";
+import { KsError } from "../exceptions/ks-error";
 import { ArgumentType } from "../types";
 import { argumentValidator } from "./argument-validator";
-// import { argumentValidator } from "../helpers";
+import { choiceVerifing } from "./choice-verification";
 
 export const processArgument = (
   args: Array<ArgumentType> | undefined,
-  command: Command
+  command: Command,
+  commandName: string
 ): Array<ArgumentType> => {
   if (!args?.length) args = [];
   args.forEach((argument) => {
-    const dateDesc =
-      argument.type === "date" ? "  (e.g. YYYY-MM-DD = 2015-02-31)." : "";
-    const newArg = new Argument(argument.name, argument.description + dateDesc);
-    if (argument.default && typeof argument.default === argument.type)
-      newArg.default(argument.default);
-    newArg.required = argument.required || false;
+    choiceVerifing(
+      argument.type,
+      argument.choices || [],
+      "choice",
+      commandName
+    );
 
+    const dateDesc =
+      argument.type === Date ? "  (e.g. YYYY-MM-DD = 2015-03-31)." : "";
+    const newArg = new Argument(argument.name, argument.description + dateDesc);
+
+    if (argument.default) {
+      if (
+        argument?.choices &&
+        argument?.choices?.length > 0 &&
+        !argument.choices.includes(argument.default)
+      ) {
+        throw new KsError(
+          `The default value provided is not valid according to the available choices. Valid choices are: ${argument.choices.join(
+            ", "
+          )}`,
+          {
+            type: "error",
+            errorType: "InvalidDefaultValueError",
+            commandName,
+          }
+        );
+      }
+      choiceVerifing(argument.type, [argument.default], "default", commandName);
+      newArg.default(argument.default);
+    }
+
+    newArg.required = argument.required || false;
     newArg.argParser((value: any) => argumentValidator(value, argument));
     command.addArgument(newArg);
   });

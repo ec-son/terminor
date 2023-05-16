@@ -1,9 +1,27 @@
 interface OptionErrorType {
   type?: "error" | "warning" | "info";
-  typeError?: "CommandInitializationError";
+  errorType?:
+    | "CommandInitializationError"
+    | "InvalidTypeError"
+    | "InvalidChoiceError"
+    | "InvalidTypeError"
+    | "InvalidDefaultValueError";
+  commandName?: string;
 }
 export class KsError extends Error {
-  constructor(public message: string, obj?: OptionErrorType) {
+  constructor(public message: string, private opt?: OptionErrorType) {
     super(message);
+  }
+
+  get type() {
+    return this.opt?.type || "info";
+  }
+
+  get typeError() {
+    return this.opt?.errorType || "error";
+  }
+
+  get commandName() {
+    return this.opt?.commandName;
   }
 }

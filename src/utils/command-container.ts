@@ -17,8 +17,10 @@ class CommandContainer {
     this._commands.push(command);
   }
 
-  getCommand(name: string): CommandInfoType | undefined {
-    return this._commands.find((command) => command.name === name);
+  getCommand(name: string | Object): CommandInfoType | undefined {
+    return typeof name === "string"
+      ? this._commands.find((command) => command.name === name)
+      : this._commands.find((command) => command.controllerInstance === name);
   }
 
   getCommandByCommandName(name: string): CommandInfoType | undefined {

@@ -27,7 +27,7 @@ export function Command(context: CommandType) {
       if (!commandNameIndex)
         throw new KsError(
           `An error occurred during the initialization of the '${target.name}' command. Please check your code and try again.`,
-          { type: "error", typeError: "CommandInitializationError" }
+          { type: "error", errorType: "CommandInitializationError" }
         );
       this[commandNameIndex] = context.commandName;
 
@@ -41,7 +41,7 @@ export function Command(context: CommandType) {
           context.helpOption.description
         );
 
-      const args = processArgument(context?.arguments, program);
+      const args = processArgument(context?.arguments, program, target.name);
       program.action((...arg: any) => processHandler(args, program, this));
 
       const subCommands = [...new Set(context?.subCommands)];
@@ -53,13 +53,11 @@ export function Command(context: CommandType) {
         if (!subCommandIndex)
           throw new KsError(
             `An error occurred during the initialization of the '${target.name}' command. Please check your code and try again.`,
-            { type: "error", typeError: "CommandInitializationError" }
+            { type: "error", errorType: "CommandInitializationError" }
           );
 
         this[subCommandIndex] = subCommands;
       }
-
-      // processCommand(context?.commands, program, target);
 
       if (!this._opts || Array.isArray(this._opts)) this._opts = [];
       originalInitFunction.call(this, program);

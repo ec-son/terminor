@@ -8,7 +8,7 @@ import { TextFileCommand } from "./text-file.command";
   arguments: [
     {
       name: "name",
-      type: "string",
+      type: String,
       description: "name of service to generatee",
     },
   ],
@@ -17,7 +17,7 @@ import { TextFileCommand } from "./text-file.command";
 export class ServiceCommand {
   @Option({
     name: "-g, --gen",
-    type: "number",
+    type: Number,
     default: 1,
   })
   gen: boolean;

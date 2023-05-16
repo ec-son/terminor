@@ -8,7 +8,7 @@ import { Command, Option } from "../decorators";
   arguments: [
     {
       name: "filename",
-      type: "string",
+      type: String,
       description: "Filename to generate",
     },
   ],
@@ -17,7 +17,7 @@ import { Command, Option } from "../decorators";
 export class GenerateCommand {
   @Option({
     name: "-g, --gen",
-    type: "number",
+    type: Number,
     default: 1,
   })
   gen: boolean;

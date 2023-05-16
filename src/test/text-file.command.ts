@@ -6,7 +6,10 @@ import { Command, Option } from "../decorators";
   arguments: [
     {
       name: "name",
-      type: "string",
+      type: Number,
+      // choices: ["red", "blue", "green", "yellow", "orange"],
+      choices: [12, 34, 5, 6],
+      default: 12,
       description: "name of text file",
     },
   ],
@@ -15,8 +18,10 @@ import { Command, Option } from "../decorators";
 export class TextFileCommand {
   @Option({
     name: "-g, --gen",
-    type: "string",
-    default: 1,
+    type: Number,
+    choices: [0, 5],
+    default: 5,
+    // required: true,
   })
   gen: boolean;
 

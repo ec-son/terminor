@@ -1,44 +1,37 @@
+import { green } from "ansi-colors";
 import { KsError } from "../exceptions/ks-error";
-import { BaseOptionArgumentInterface } from "../types/base-option-argument.interface";
+import { BaseOptionArgumentInterface } from "../types/base-option-argument.type";
+import { ValidType } from "../types";
+import { checkValueType, getValueType } from "./check-value-type";
 
 export const argumentValidator = (
   value: any,
   argument: BaseOptionArgumentInterface & {
-    type?: "string" | "number" | "float" | "boolean" | "date";
+    type: ValidType;
   },
   flag?: "opt" | "arg"
 ) => {
-  switch (argument.type) {
-    case "number":
-      if (!Number.isInteger(parseInt(value)))
-        throw new KsError(`'${argument.name}' argument must be a number`, {
-          type: "error",
-        });
-      value = parseInt(value);
-      break;
-    case "float":
-      if (!Number.isInteger(parseInt(value)))
-        throw new KsError(`'${argument.name}' argument must be a float`, {
-          type: "error",
-        });
-      value = parseFloat(value);
-      break;
-    case "date":
-      if (!/^.+[\/|\-].+$/.test(value) || Number.isNaN(Date.parse(value)))
-        throw new KsError(`'${argument.name}' argument must be a date`, {
-          type: "error",
-        });
-      value = new Date(value);
-      break;
-  }
+  if (!checkValueType(argument.type, value))
+    throw new KsError(
+      `The ${green("'" + argument.name + "'")} ${
+        flag && flag === "opt" ? "option" : "argument"
+      } must be a ${getValueType(argument.type)}`,
+      {
+        type: "error",
+        errorType: "InvalidTypeError",
+      }
+    );
+
+  if (argument.type === Number) value = parseFloat(value);
+  else if (argument.type === Date) value = new Date(value);
 
   if (argument.choices && !argument.choices.includes(value)) {
-    const choices = argument.choices.join(", ");
-    const _name = argument.name;
-    let msg = `command-argument value '${value}' is invalid for argument '${_name}'. Allowed choices are ${choices}.`;
-    if (flag && flag === "opt")
-      msg = `option '${_name}' argument '${value}' is invalid. Allowed choices are ${choices}.`;
-    throw new KsError(msg, { type: "error" });
+    throw new KsError(
+      `The value provided for ${green("'" + argument.name + "'")} ${
+        flag && flag === "opt" ? "option" : "argument"
+      } is not valid. Valid choices are: ${argument.choices.join(", ")}`,
+      { type: "error", errorType: "InvalidChoiceError" }
+    );
   }
 
   if (argument.argParse) return argument.argParse(value);
