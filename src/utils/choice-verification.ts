@@ -1,5 +1,5 @@
 import { KsError } from "../exceptions/ks-error";
-import { ValidType } from "../types";
+import { ValidType } from "../types/utilities.type";
 
 export function choiceVerifing(
   valueType: ValidType,

@@ -1,11 +1,11 @@
 import { Command } from "commander";
 import { KsError } from "../exceptions/ks-error";
 import { appInfo } from "../helpers";
-import { ArgumentType } from "../types";
-import { initSubCommand } from "../types/sub-command-init";
+import { initSubCommand } from "../utils/sub-command-init";
 import { commandContainer } from "../utils/command-container";
 import { processArgument } from "../utils/process-argument";
 import { processHandler } from "../utils/process-handler";
+import { ArgumentType } from "../types/argument.type";
 
 export function App(context?: {
   commands?: Array<any>;
@@ -17,6 +17,10 @@ export function App(context?: {
   helpOption?: {
     flag?: string;
     description?: string;
+    addHelpText?: {
+      position: "after" | "before";
+      text: string;
+    };
   };
   versionOption?: {
     version?: string;
@@ -29,10 +33,15 @@ export function App(context?: {
       target.prototype.init || function () {};
 
     target.prototype.init = function (program: Command) {
+      if (this["postAction"])
+        program.hook("postAction", () => {
+          this.postAction();
+        });
+
       if (program instanceof Command == false)
         throw new KsError(
           `Expected a command class, but received a different type: ${typeof program}`,
-          { type: "error" }
+          { type: "error", errorType: "InvalidTypeError" }
         );
 
       const appName = context?.commandName || appInfo("name");
@@ -61,33 +70,40 @@ export function App(context?: {
           context?.versionOption?.flag,
           context?.versionOption?.description
         );
-      if (context?.helpOption)
+
+      if (context?.helpOption) {
         program.helpOption(
           context.helpOption.flag,
           context.helpOption.description
         );
+
+        if (context.helpOption.addHelpText)
+          program.addHelpText(
+            context.helpOption.addHelpText.position,
+            context.helpOption.addHelpText.text
+          );
+      }
+
       if (description) program.description(description);
       if (context?.usage) program.usage(context?.usage);
 
       const args = processArgument(context?.arguments, program, target.name);
-      program.action((...arg: any) => processHandler(args, program, this));
+      program.action((...arg: any) =>
+        processHandler(args, program, this, target.name)
+      );
 
       const subCommands = [...new Set(context?.subCommands)];
       const commands = [...new Set(context?.commands)];
+      const commandInfo = commandContainer.getCommand(target.name);
 
-      if (subCommands.length > 0) {
-        const subCommandIndex = commandContainer.getCommand(
-          target.name
-        )?.subCommandIndex;
+      if (!commandInfo)
+        throw new KsError(
+          `An error occurred during the initialization of the '${target.name}' command. Please check your code and try again.`,
+          { type: "error", errorType: "CommandInitializationError" }
+        );
 
-        if (!subCommandIndex)
-          throw new KsError(
-            `An error occurred during the initialization of the 'app' command : '${target.name}'. Please check your code and try again.`,
-            { type: "error", errorType: "CommandInitializationError" }
-          );
-
-        this[subCommandIndex] = subCommands;
-      }
+      this[commandInfo.subCommandIndex] = subCommands || [];
+      this[commandInfo.optionIndex] = [];
 
       commands?.forEach((command) => {
         const commandInstance = new Command();
@@ -99,10 +115,10 @@ export function App(context?: {
           name: command.name,
           subCommandIndex: Symbol(),
           commandNameIndex: Symbol(),
+          optionIndex: Symbol(),
         });
       });
 
-      if (!this._opts || Array.isArray(this._opts)) this._opts = [];
       originalInitFunction.call(this, program);
     };
 

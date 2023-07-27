@@ -1,17 +1,13 @@
-import { ValidType } from "../types";
+import { ValidType } from "../types/utilities.type";
 
-export function checkValueType(
-  type: ValidType,
-  value: any,
-  isUser: boolean = true
-) {
+export function checkValueType(type: ValidType, value: any, isSys?: boolean) {
   if (type === Number) {
-    if (!isUser) return typeof value === "number";
+    if (isSys) return typeof value === "number";
     else return Number.isInteger(parseInt(value));
   } else if (type === String) return typeof value === "string";
   else if (type === Boolean) return typeof value === "boolean";
   else if (type === Date) {
-    if (!isUser) return value instanceof Date;
+    if (isSys) return value instanceof Date;
     else if (typeof value === "string")
       return (
         /^\d{1,4}[\/|\-]\d{1,4}[\/|\-]\d{1,4}$/.test(value) &&

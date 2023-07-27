@@ -5,6 +5,7 @@ type CommandInfoType = {
   name: string;
   subCommandIndex: symbol;
   commandNameIndex: symbol;
+  optionIndex: symbol;
 };
 class CommandContainer {
   private _commands: Array<CommandInfoType> = [];

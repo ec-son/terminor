@@ -1,5 +1,5 @@
 {
-  "name": "termtran",
+  "name": "terminor",
   "version": "1.0.0",
   "description": "A CLI to translate between languages in the terminal",
   "main": "dist/index.js",

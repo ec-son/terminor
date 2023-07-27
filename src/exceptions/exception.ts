@@ -3,24 +3,26 @@ import { underline, redBright, gray, cyan } from "ansi-colors";
 export default () => {
   process.on("uncaughtException", function (err) {
     if (err instanceof KsError) {
-      switch (err.type) {
-        case "info":
-          throwException("INFO", err.typeError, err.message, {
-            commandName: err.commandName,
-          });
-          break;
+      if (err.message) {
+        switch (err.type) {
+          case "info":
+            throwException("INFO", err.typeError, err.message, {
+              commandName: err.commandName,
+            });
+            break;
 
-        case "warning":
-          throwException("WARNING", err.typeError, err.message, {
-            commandName: err.commandName,
-          });
-          break;
+          case "warning":
+            throwException("WARNING", err.typeError, err.message, {
+              commandName: err.commandName,
+            });
+            break;
 
-        default:
-          throwException("ERROR", err.typeError, err.message, {
-            commandName: err.commandName,
-          });
-          break;
+          default:
+            throwException("ERROR", err.typeError, err.message, {
+              commandName: err.commandName,
+            });
+            break;
+        }
       }
     } else throw err;
   });

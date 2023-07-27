@@ -5,7 +5,10 @@ interface OptionErrorType {
     | "InvalidTypeError"
     | "InvalidChoiceError"
     | "InvalidTypeError"
-    | "InvalidDefaultValueError";
+    | "InvalidDefaultValueError"
+    | "UndefinedOptionNameError"
+    | "MethodNotFoundError"
+    | "MissingValueError";
   commandName?: string;
 }
 export class KsError extends Error {
