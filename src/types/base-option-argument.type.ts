@@ -1,14 +1,14 @@
 export interface BaseOptionArgumentInterface {
   /**
-   * @property {string} description - description of argument
+   * @property {string} description description of argument
    */
   description?: string;
   /**
-   * @property {string} required -
+   * @property {string} required
    */
   required?: boolean;
   /**
-   * @property {Array} choices - Only allow argument value to be one of choices.
+   * @property {Array} choices Only allow argument value to be one of choices.
    */
   choices?: any[];
   /**
@@ -17,22 +17,22 @@ export interface BaseOptionArgumentInterface {
   default?: any;
   /**
    * Set the custom validator
-   * @param {*} value - The value to be validated.
-   * @param validator - Calls the built-in validator function
+   * @param {*} value The value to be validated.
+   * @param validator Calls the built-in validator function
    * @returns {boolean|void} Returns boolean value indicating the validation value. If the result is false, the program will be exited.
    */
   validator?: (value: any, validator: () => void) => boolean | void;
   /**
    * Set the custom transform
-   * @param value - The value to be
-   * @param transform - Calls the built-in transform function
-   * @returns - Returns transformed value
+   * @param value The value to be
+   * @param transform Calls the built-in transform function
+   * @returns Returns transformed value
    */
   transform?: (value: any, transform: () => any) => any;
   /**
    *
    * @param value
-   * @param {string} errorType - Error type
+   * @param {string} errorType Error type
    * @returns {string | void} Returns error message.
    * @example
    * // You can use console.log() and call terExit() function to terminate the program.

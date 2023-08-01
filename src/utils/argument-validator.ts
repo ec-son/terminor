@@ -7,9 +7,9 @@ import { ValidType } from "../types/utilities.type";
 
 /**
  * used for validation of value
- * @param value - The value to be checked
- * @param argument - metadata of argument to be used when checking
- * @param flag - used to check whether value is argument or option
+ * @param value The value to be checked
+ * @param argument metadata of argument to be used when checking
+ * @param flag used to check whether value is argument or option
  * @returns
  */
 export function argumentValidator(

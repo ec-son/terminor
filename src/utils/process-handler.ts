@@ -4,15 +4,14 @@ import { TerData } from "../tools/terData";
 import { commandContainer } from "./command-container";
 import { ArgumentType } from "../types/argument.type";
 import { OptionType } from "../types/option.type";
-import { ValidType } from "../types/utilities.type";
 import { transformDefaultValue } from "./argument-validator";
 
 /**
  *
- * @param args - argument supplied by user.
- * @param command - instance of commander
- * @param _command - instance of current command
- * @param commandName - name of the command
+ * @param args argument supplied by user.
+ * @param command instance of commander
+ * @param _command instance of current command
+ * @param commandName name of the command
  */
 export function processHandler(
   args: Array<ArgumentType>,

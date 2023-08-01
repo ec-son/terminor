@@ -8,7 +8,8 @@ interface OptionErrorType {
     | "InvalidDefaultValueError"
     | "UndefinedOptionNameError"
     | "MethodNotFoundError"
-    | "MissingValueError";
+    | "MissingValueError"
+    | "DuplicateItemError";
   commandName?: string;
 }
 export class KsError extends Error {

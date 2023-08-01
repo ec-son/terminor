@@ -1,5 +1,14 @@
 import { ValidType } from "../types/utilities.type";
 
+/**
+ * check if the type of the given value matches the specified type.
+ * Optionally, you can specify if the data was provided by a user or developer
+ *
+ * @param {ValidType} type The valid type to check against.
+ * @param {*} value The value to check its type.
+ * @param {boolean} [isSys=false] A flag indicating whether the data was provided by a system (developer) or user
+ * @returns {boolean} Returns true if the type of the value matches, false otherwise.
+ */
 export function checkValueType(type: ValidType, value: any, isSys?: boolean) {
   if (type === Number) {
     if (isSys) return typeof value === "number";
