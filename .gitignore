@@ -1,5 +1,4 @@
 node_modules
 dev
 dist
-src/add-command
 src/test

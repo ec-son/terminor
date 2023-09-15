@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { commandContainer } from "../utils/command-container";
+import { commandContainer } from "./command-container";
 
 export function initSubCommand(commandInfo: {
   commandInstance: Command;

@@ -10,6 +10,7 @@ export class Cli {
       name: AppComponent.name,
       subCommandIndex: Symbol(),
       commandNameIndex: Symbol(),
+      optionIndex: Symbol(),
     };
     commandContainer.setCommand(appInfo);
 
@@ -22,14 +23,6 @@ export class Cli {
       commandInfo.controllerInstance["init"](commandInfo.commandInstance);
     });
 
-    // commandContainer.forEach((commandInfo) => {
-    //   if (commandInfo.name !== AppComponent.name) {
-    //     // commandInfo.controllerInstance["initSubCommand"](commandInfo);
-    //     commandInfo.commandInstance.addCommand(commandInfo.commandInstance);
-    //   }
-    //   // commandInfo.commandInstance.addCommand(commandInfo.commandInstance);
-    // });
-
     commandContainer.forEach((commandInfo) => {
       if (commandInfo.name !== AppComponent.name) {
         commandInfo.controllerInstance["initSubCommand"](commandInfo);
@@ -37,12 +30,6 @@ export class Cli {
     });
 
     app.initSubCommand(appInfo);
-
-    // commandContainer.forEach((value) => {
-    //   console.log("===================================");
-    //   console.log(value.name);
-    //   console.log(value.controllerInstance[value.subCommandIndex]);
-    // });
   }
 
   run() {

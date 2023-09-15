@@ -10,5 +10,9 @@ export interface CommandType {
   helpOption?: {
     flag?: string;
     description?: string;
+    addHelpText?: {
+      position: "after" | "before";
+      text: string;
+    };
   };
 }

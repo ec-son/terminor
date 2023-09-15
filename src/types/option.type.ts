@@ -3,6 +3,6 @@ import { ValidType } from "./utilities.type";
 
 export interface OptionType extends BaseOptionArgumentInterface {
   type: ValidType;
-  long?: string;
-  short?: string;
+  optionName: string;
+  alias?: string; // alias
 }

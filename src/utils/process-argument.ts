@@ -1,8 +1,8 @@
 import { Argument, Command } from "commander";
 import { KsError } from "../exceptions/ks-error";
-import { ArgumentType } from "../types";
 import { argumentValidator } from "./argument-validator";
 import { choiceVerifing } from "./choice-verification";
+import { ArgumentType } from "../types/argument.type";
 
 export const processArgument = (
   args: Array<ArgumentType> | undefined,
@@ -19,8 +19,11 @@ export const processArgument = (
     );
 
     const dateDesc =
-      argument.type === Date ? "  (e.g. YYYY-MM-DD = 2015-03-31)." : "";
-    const newArg = new Argument(argument.name, argument.description + dateDesc);
+      argument.type === Date ? "  (e.g. YYYY-MM-DD = 2015-03-31)" : "";
+    const newArg = new Argument(
+      argument.argumentName,
+      (argument.description || "") + dateDesc
+    );
 
     if (argument.default) {
       if (
@@ -40,10 +43,12 @@ export const processArgument = (
         );
       }
       choiceVerifing(argument.type, [argument.default], "default", commandName);
-      newArg.default(argument.default);
+      // newArg.default(argument.default);
     }
 
-    newArg.required = argument.required || false;
+    // newArg.required = argument.required || false;
+    newArg.required = false;
+
     newArg.argParser((value: any) => argumentValidator(value, argument));
     command.addArgument(newArg);
   });

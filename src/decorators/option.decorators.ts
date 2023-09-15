@@ -1,23 +1,39 @@
 import { Command, Option as _O } from "commander";
 import { KsError } from "../exceptions/ks-error";
-import { OptionType, ValidType } from "../types";
 import { argumentValidator } from "../utils/argument-validator";
 import { choiceVerifing } from "../utils/choice-verification";
 import { commandContainer } from "../utils/command-container";
+import { OptionType } from "../types/option.type";
+import { ValidType } from "../types/utilities.type";
 
 export function Option(_opt: OptionType) {
   return function (target, propertyName: string) {
     const originalInitFunction: Function = target.init || function () {};
     target.init = function (program: Command) {
       const option = { ..._opt, propertyName };
-      const newOption = new _O(option.name, option.description);
 
-      if (option.long) newOption.long = option.long;
-      if (option.short) newOption.short = option.short;
+      const optionName = option.alias
+        ? `${option.alias.replace(/^-{0,}/, "-")}, ${option.optionName.replace(
+            /^-{0,}/,
+            "--"
+          )}`
+        : option.optionName.replace(/^-{0,}/, "--");
 
-      const commandName = commandContainer.getCommand(this)?.name;
+      const dateDesc =
+        option.type === Date ? "  (e.g. YYYY-MM-DD = 2015-03-31)" : "";
+      const newOption = new _O(
+        optionName,
+        (option.description || "") + dateDesc
+      );
 
-      choiceVerifing(option.type, option.choices || [], "choice", commandName);
+      const commandInfo = commandContainer.getCommand(this);
+
+      choiceVerifing(
+        option.type,
+        option.choices || [],
+        "choice",
+        commandInfo?.name
+      );
       if (option.default) {
         if (
           option?.choices &&
@@ -31,12 +47,17 @@ export function Option(_opt: OptionType) {
             {
               type: "error",
               errorType: "InvalidDefaultValueError",
-              commandName,
+              commandName: commandInfo?.name,
             }
           );
         }
-        choiceVerifing(option.type, [option.default], "default", commandName);
-        newOption.default(option.default);
+        choiceVerifing(
+          option.type,
+          [option.default],
+          "default",
+          commandInfo?.name
+        );
+        // newOption.default(option.default);
       }
 
       if (
@@ -47,13 +68,14 @@ export function Option(_opt: OptionType) {
           ? (newOption.required = true)
           : (newOption.optional = true);
       }
+
       newOption.argParser((value: any) =>
         argumentValidator(value, option, "opt")
       );
+
       program.addOption(newOption);
-      this._opts && Array.isArray(this._opts)
-        ? this._opts.push(option)
-        : (this._opts = [option]);
+
+      this[commandInfo!.optionIndex].push(option);
 
       originalInitFunction.call(this, program);
     };

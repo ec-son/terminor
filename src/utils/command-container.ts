@@ -1,10 +1,12 @@
 import { Command } from "commander";
+import { KsError } from "../exceptions/ks-error";
 type CommandInfoType = {
   commandInstance: Command;
   controllerInstance: Object;
   name: string;
   subCommandIndex: symbol;
   commandNameIndex: symbol;
+  optionIndex: symbol;
 };
 class CommandContainer {
   private _commands: Array<CommandInfoType> = [];
@@ -14,6 +16,13 @@ class CommandContainer {
   }
 
   setCommand(command: CommandInfoType) {
+    if (
+      this.getCommand(command.name) ||
+      this.getCommand(command.controllerInstance)
+    )
+      throw new KsError(`${command.name} instance already exists.`, {
+        errorType: "DuplicateItemError",
+      });
     this._commands.push(command);
   }
 
