@@ -1,5 +1,4 @@
 import { ArgumentType } from "./../../src/types/argument.type";
-import { Argument } from "commander";
 
 jest.mock("commander", () => {
   return {
@@ -13,22 +12,16 @@ jest.mock("commander", () => {
   };
 });
 
-// const command = new (function () {
-//   this.addArgument = function (arg) {
-//     this.arguments.push(arg);
-//   };
-// })();
-
 describe("process arguments", () => {
   it("", () => {
     const args: Array<ArgumentType> | undefined = [
       {
         argumentName: "foo",
-        type: Number,
+        type: "number",
       },
       {
         argumentName: "bar",
-        type: String,
+        type: "string",
         default: "text",
       },
     ];

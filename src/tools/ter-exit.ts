@@ -5,5 +5,6 @@ import { KsError } from "../exceptions/ks-error";
  * @returns {void}
  */
 export function terExit() {
-  throw new KsError("");
+  // throw new KsError("");
+  process.exit();
 }

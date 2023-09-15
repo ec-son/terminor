@@ -12,7 +12,7 @@ export class Cli {
       commandNameIndex: Symbol(),
       optionIndex: Symbol(),
     };
-    commandContainer.setCommand(appInfo);
+    // commandContainer.setCommand(appInfo);
 
     app.init(program);
 
@@ -20,12 +20,12 @@ export class Cli {
       if (commandInfo.name === AppComponent.name) {
         return;
       }
-      commandInfo.controllerInstance["init"](commandInfo.commandInstance);
+      commandInfo.commandInstance["init"](commandInfo.commandInstance);
     });
 
     commandContainer.forEach((commandInfo) => {
       if (commandInfo.name !== AppComponent.name) {
-        commandInfo.controllerInstance["initSubCommand"](commandInfo);
+        commandInfo.commandInstance["initSubCommand"](commandInfo);
       }
     });
 

@@ -1,41 +1,75 @@
-import { Command } from "commander";
+import { command } from "yargs";
 import { KsError } from "../exceptions/ks-error";
-type CommandInfoType = {
-  commandInstance: Command;
-  controllerInstance: Object;
-  name: string;
-  subCommandIndex: symbol;
-  commandNameIndex: symbol;
-  optionIndex: symbol;
-};
+import { CommandInfoType } from "../types/command-info.type";
+import { MetaDataType } from "../types/metadata.type";
+
 class CommandContainer {
-  private _commands: Array<CommandInfoType> = [];
+  private commands: Array<CommandInfoType> = [];
 
   get length(): number {
-    return this._commands.length;
+    return this.commands.length;
   }
 
   setCommand(command: CommandInfoType) {
     if (
       this.getCommand(command.name) ||
-      this.getCommand(command.controllerInstance)
+      this.getCommand(command.commandInstance)
     )
       throw new KsError(`${command.name} instance already exists.`, {
         errorType: "DuplicateItemError",
       });
-    this._commands.push(command);
+    this.commands.push(command);
   }
 
-  getCommand(name: string | Object): CommandInfoType | undefined {
-    return typeof name === "string"
-      ? this._commands.find((command) => command.name === name)
-      : this._commands.find((command) => command.controllerInstance === name);
+  getCommand(name: string | Object): CommandInfoType | undefined;
+  getCommand(
+    name: string | Object,
+    isMetadata: boolean
+  ): CommandInfoType | MetaDataType | undefined;
+
+  getCommand(
+    name: string | Object,
+    isMetadata?: boolean
+  ): CommandInfoType | MetaDataType | undefined {
+    const commandInfo =
+      typeof name === "string"
+        ? this.commands.find((command) => command.name === name)
+        : this.commands.find((command) => command.commandInstance === name);
+
+    if (!isMetadata) return commandInfo;
+    return commandInfo?.commandInstance[commandInfo.index];
   }
 
-  getCommandByCommandName(name: string): CommandInfoType | undefined {
-    return this._commands.find(
-      (command) => command.controllerInstance[command.commandNameIndex] === name
+  getCommandByCommandName(commandName: string): CommandInfoType | undefined;
+
+  getCommandByCommandName(
+    commandName: string,
+    isMetadata?: boolean
+  ): CommandInfoType | MetaDataType | undefined;
+
+  getCommandByCommandName(
+    commandName: string,
+    isMetadata?: boolean
+  ): CommandInfoType | MetaDataType | undefined {
+    if (!commandName) return undefined;
+
+    let commandInfo = this.commands.find(
+      (command) =>
+        command.commandInstance[command.index] &&
+        (command.commandInstance[command.index] as MetaDataType).commandName ===
+          commandName
     );
+
+    if (!commandInfo)
+      commandInfo = this.commands.find(
+        (command) =>
+          command.commandInstance[command.index] &&
+          (command.commandInstance[command.index] as MetaDataType).alias ===
+            commandName
+      );
+
+    if (!isMetadata) return commandInfo;
+    return commandInfo?.commandInstance[commandInfo.index];
   }
 
   forEach(
@@ -46,7 +80,7 @@ class CommandContainer {
     ) => void,
     thisArg?: any
   ): void {
-    this._commands.forEach(callbackfn, thisArg);
+    this.commands.forEach(callbackfn, thisArg);
   }
 }
 

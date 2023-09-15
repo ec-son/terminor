@@ -1,30 +1,45 @@
-import { Command, Option as _O } from "commander";
 import { KsError } from "../exceptions/ks-error";
-import { argumentValidator } from "../utils/argument-validator";
 import { choiceVerifing } from "../utils/choice-verification";
 import { commandContainer } from "../utils/command-container";
-import { OptionType } from "../types/option.type";
-import { ValidType } from "../types/utilities.type";
+import { OptionType, OptionValueType } from "../types/option.type";
+import { formatOptionFlag } from "../utils/format-option-flag";
+import { MetaDataType } from "../types/metadata.type";
+import { isEqual } from "../utils/is-equal";
+import { ValidType } from "../types/valid.type";
 
-export function Option(_opt: OptionType) {
+export function Option(
+  _opt?: Omit<OptionType, "type" | "optionName"> &
+    Partial<Pick<OptionType, "type" | "optionName">>
+) {
   return function (target, propertyName: string) {
     const originalInitFunction: Function = target.init || function () {};
-    target.init = function (program: Command) {
+    target.init = function () {
       const option = { ..._opt, propertyName };
+      option.optionName = option.optionName || option.propertyName;
 
-      const optionName = option.alias
-        ? `${option.alias.replace(/^-{0,}/, "-")}, ${option.optionName.replace(
-            /^-{0,}/,
-            "--"
-          )}`
-        : option.optionName.replace(/^-{0,}/, "--");
-
-      const dateDesc =
-        option.type === Date ? "  (e.g. YYYY-MM-DD = 2015-03-31)" : "";
-      const newOption = new _O(
-        optionName,
-        (option.description || "") + dateDesc
+      const { flag, alias } = formatOptionFlag(
+        option.flag || option.optionName,
+        option.alias
       );
+
+      if (!option.type) {
+        if (
+          (["boolean", "date", "number", "string"] as ValidType[]).includes(
+            typeof this[propertyName] as ValidType
+          )
+        )
+          option.type = typeof this[propertyName] as ValidType;
+        else option.type = "boolean";
+      }
+
+      if (option.type === "date") {
+        const dateDesc =
+          option.type === "date" ? " (e.g. YYYY-MM-DD = 2015-03-31)" : "";
+        option.description = (option.description || "") + dateDesc;
+      }
+      option.description = option.description?.trim();
+      option.alias = alias;
+      option.flag = flag;
 
       const commandInfo = commandContainer.getCommand(this);
 
@@ -34,16 +49,20 @@ export function Option(_opt: OptionType) {
         "choice",
         commandInfo?.name
       );
+
+      if (!option.default && this[propertyName] !== undefined)
+        option.default = this[propertyName];
+
       if (option.default) {
         if (
           option?.choices &&
           option?.choices?.length > 0 &&
-          !option.choices.includes(option.default)
+          !option.choices.find((el) => isEqual(el, option.default))
         ) {
           throw new KsError(
-            `The default value provided is not valid according to the available choices. Valid choices are: ${option.choices.join(
-              ", "
-            )}`,
+            `The default value provided is not valid according to the available choices. Valid choices are: ${option.choices
+              .map((el) => JSON.stringify(el))
+              .join(", ")}`,
             {
               type: "error",
               errorType: "InvalidDefaultValueError",
@@ -57,27 +76,12 @@ export function Option(_opt: OptionType) {
           "default",
           commandInfo?.name
         );
-        // newOption.default(option.default);
       }
 
-      if (
-        option?.type &&
-        ([Number, String, Date] as Array<ValidType>).includes(option?.type)
-      ) {
-        option.required
-          ? (newOption.required = true)
-          : (newOption.optional = true);
-      }
-
-      newOption.argParser((value: any) =>
-        argumentValidator(value, option, "opt")
+      (this[commandInfo!.index] as MetaDataType).options.push(
+        option as unknown as OptionValueType
       );
-
-      program.addOption(newOption);
-
-      this[commandInfo!.optionIndex].push(option);
-
-      originalInitFunction.call(this, program);
+      originalInitFunction.call(this);
     };
   };
 }

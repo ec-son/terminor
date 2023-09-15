@@ -1,18 +1,19 @@
 import { ArgumentType } from "./argument.type";
+import { HelpType } from "./option.type";
 
-export interface CommandType {
-  commandName: string; // Set the name of the command
+export type CommandType = {
+  commandName: string;
   alias?: string;
   subCommands?: Array<string>;
-  arguments?: Array<ArgumentType>;
+  arguments?: Array<
+    Omit<ArgumentType, "type"> & Partial<Pick<ArgumentType, "type">>
+  >;
   usage?: string;
   description?: string;
-  helpOption?: {
-    flag?: string;
-    description?: string;
-    addHelpText?: {
-      position: "after" | "before";
-      text: string;
-    };
-  };
-}
+  helpOption?: HelpType;
+
+  /**
+   * Indicates whether all required arguments must precede all optional arguments in the command line order.
+   */
+  requiredArgsFirst?: boolean;
+};
