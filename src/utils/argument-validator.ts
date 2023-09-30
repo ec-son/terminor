@@ -19,6 +19,8 @@ export function argumentValidator(
   if (argument.treated) return argument.value;
   if (argument["flag"] && argument.type === "boolean") return !!value;
 
+  if (argument.trim) value = value?.trim();
+
   if (!value) {
     if (argument.default) return argument.default;
     if (argument.required)

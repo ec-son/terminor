@@ -25,6 +25,11 @@ export interface BaseOptionArgumentInterface {
   variadic?: boolean;
 
   /**
+   * @property Indicates whether the value should be trimmed.
+   */
+  trim?: boolean;
+
+  /**
    * Set the custom validator
    * @param {*} value The value to be validated.
    * @param validator Calls the built-in validator function

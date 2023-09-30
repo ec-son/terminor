@@ -206,16 +206,19 @@ export class Cli {
           });
         }
 
-        if (this.isArg) {
-          const result = this.argumentHandler(metadata.args, args, command);
-          args = Array.isArray(result) ? result : args;
-          if (!Array.isArray(result) || result.length < 1) this.isArg = false;
-          return this.process(args, metadata);
-        } else if (args.length > 0) {
-          if (!this.configCli.allowExcessArguments)
-            throw new KsError(`Unknown arg '${args}'`);
-          args.shift();
-          return this.process(args, metadata);
+        if (args.length > 0) {
+          if (this.isArg) {
+            const result = this.argumentHandler(metadata.args, args, command);
+            args = Array.isArray(result) ? result : args;
+            if (!Array.isArray(result) || result.length < 1) this.isArg = false;
+
+            return this.process(args, metadata);
+          } else {
+            if (!this.configCli.allowExcessArguments)
+              throw new KsError(`Unknown arg '${args}'`);
+            args.shift();
+            return this.process(args, metadata);
+          }
         }
       }
     }
@@ -266,23 +269,23 @@ export class Cli {
     args.shift(); // Removes option
 
     if (opt.variadic) {
-      const v: any[] = [];
-      v.push(argumentValidator(args[0], opt));
-      args.shift(); // Removes value of option
+      [opt.value, args] = getValueForVariadic(opt, args);
+      // const v: any[] = [];
+      // v.push(argumentValidator(args[0], opt));
+      // args.shift(); // Removes value of option
+      // const _args = args.slice();
 
-      for (const value of args) {
-        if (
-          value &&
-          !value.startsWith("-") &&
-          checkValueType(opt.type, value)
-        ) {
-          {
-            v.push(argumentValidator(value, opt));
-            args.shift(); // Removes value of option
-          }
-        } else break;
-      }
-      opt.value = v;
+      // for (const value of _args) {
+      //   if (
+      //     value &&
+      //     !value.startsWith("-") &&
+      //     checkValueType(opt.type, value)
+      //   ) {
+      //     v.push(argumentValidator(value, opt));
+      //     args.shift(); // Removes value of option
+      //   } else break;
+      // }
+      // opt.value = v;
     } else {
       args.shift(); // Removes value of option
       opt.value = argumentValidator(args[1], opt);
@@ -298,13 +301,38 @@ export class Cli {
     args: string[],
     command: Object
   ): Array<string> | null {
-    const arg = argsOpt.find((el) => !el.value);
+    if (!args || args.length === 0) return null;
+
+    const arg = argsOpt.find((el) => !el.treated);
     if (!arg) return null;
 
-    arg.value = argumentValidator(args[0], arg);
-    arg.treated = true;
+    if (arg.variadic) {
+      [arg.value, args] = getValueForVariadic(arg, args);
+      // const v: any[] = [];
+      // v.push(argumentValidator(args[0], arg));
+      // args.shift(); // Removes value of arg
 
-    if (args) args.shift();
+      // const _args = args.slice();
+
+      // for (const value of _args) {
+      //   if (
+      //     value &&
+      //     !value.startsWith("-") &&
+      //     checkValueType(arg.type, value)
+      //   ) {
+      //     {
+      //       v.push(argumentValidator(value, arg));
+      //       args.shift(); // Removes value of argument
+      //     }
+      //   } else break;
+      // }
+      // arg.value = v;
+    } else {
+      arg.value = argumentValidator(args[0], arg);
+      args.shift();
+    }
+
+    arg.treated = true;
     return args;
   }
 
@@ -385,4 +413,25 @@ function isExistSubCommand(
   return (
     metadata.alias === command && subCommandNames.includes(metadata.commandName)
   );
+}
+
+function getValueForVariadic(
+  arg: OptionValueType | ArgumentValueType,
+  args: string[]
+): [string[], string[]] {
+  const v: any[] = [];
+  v.push(argumentValidator(args[0], arg));
+  args.shift(); // Removes value
+
+  const _args = args.slice();
+
+  for (const value of _args) {
+    if (value && !value.startsWith("-") && checkValueType(arg.type, value)) {
+      {
+        v.push(argumentValidator(value, arg));
+        args.shift(); // Removes value
+      }
+    } else break;
+  }
+  return [v, args];
 }
