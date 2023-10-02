@@ -13,11 +13,12 @@ type OptionDescType = Array<{
 }>;
 
 export class Help {
+  private isChangedItemWidth: boolean = false;
+
   private windowSize: number = process.stdout.getWindowSize()[0];
   private itemWidth: number = 30;
-  private isChangedItemWidth: boolean = false;
-  itemIndentWidth = 2;
-  itemSeparatorWidth = 2;
+  private itemIndentWidth = 2;
+  private itemSeparatorWidth = 2;
 
   // extra info config
   _extraInfo = {
