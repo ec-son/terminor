@@ -1,15 +1,9 @@
 import { ArgumentType } from "../types/argument.type";
+import { HelpConfig } from "../types/config-cli.type";
 import { MetaDataType } from "../types/metadata.type";
 import { ValidType } from "../types/valid.type";
 import { commandContainer } from "../utils/command-container";
 import { formatOptionFlag } from "../utils/format-option-flag";
-
-type HelpConfig = {
-  windowSize?: number;
-  itemWith?: number;
-  itemIndentWidth?: number;
-  itemSeparatorWidth?: number;
-};
 
 type OptionDescType = Array<{
   type?: ValidType;
@@ -20,9 +14,18 @@ type OptionDescType = Array<{
 
 export class Help {
   private windowSize: number = process.stdout.getWindowSize()[0];
-  private itemWith: number = 30;
+  private itemWidth: number = 30;
+  private isChangedItemWidth: boolean = false;
   itemIndentWidth = 2;
-  itemSeparatorWidth = 2; // between term and description
+  itemSeparatorWidth = 2;
+
+  // extra info config
+  _extraInfo = {
+    showType: true,
+    showDefaultValue: true,
+    showChoice: true,
+  };
+
   constructor(
     private metadata: MetaDataType,
     private parentCommandNames: string[],
@@ -30,15 +33,31 @@ export class Help {
   ) {
     if (helpConfig) {
       for (const key of Object.keys(helpConfig) as Array<keyof HelpConfig>) {
-        if (key in this && helpConfig[key]) this[key] = helpConfig[key]!;
+        if (key in this) {
+          if ("extraInfo" === key) {
+            if (typeof helpConfig[key] === "boolean" && !helpConfig[key])
+              this._extraInfo = {
+                showChoice: false,
+                showDefaultValue: false,
+                showType: false,
+              };
+            else if (typeof helpConfig[key] !== "boolean")
+              Object.assign(this._extraInfo, helpConfig[key]);
+
+            break;
+          }
+
+          if (key === "itemWidth") this.isChangedItemWidth = true;
+          this[key] = helpConfig[key]!;
+        }
       }
     }
   }
 
   private width() {
-    const itemWith = Math.floor((this.itemWith * this.windowSize) / 100);
-    const desc = this.windowSize - itemWith;
-    return [itemWith, desc];
+    const itemWidth = Math.floor((this.itemWidth * this.windowSize) / 100);
+    const desc = this.windowSize - itemWidth;
+    return [itemWidth, desc];
   }
 
   private splitText(str: string, limit: number, isItem?: boolean): string[] {
@@ -67,15 +86,15 @@ export class Help {
 
   private formatItem(item: string, desc?: string, isFlag?: boolean): string {
     desc = desc || "";
-    let [itemWith, descWith] = this.width();
+    let [itemWidth, descWith] = this.width();
 
-    const itemWithText =
-      itemWith - (this.itemSeparatorWidth + this.itemIndentWidth);
+    const itemWidthText =
+      itemWidth - (this.itemSeparatorWidth + this.itemIndentWidth);
 
-    const itemSplit = this.splitText(item, itemWithText, true).map(
+    const itemSplit = this.splitText(item, itemWidthText, true).map(
       (str) =>
         " ".padEnd(this.itemIndentWidth) +
-        str.padEnd(itemWithText + this.itemSeparatorWidth)
+        str.padEnd(itemWidthText + this.itemSeparatorWidth)
     );
     const descSplit = this.splitText(desc, descWith);
 
@@ -107,7 +126,7 @@ export class Help {
         else str += itemSplit[i] + "\n";
       } else {
         if (itemSplit.length > i) str += itemSplit[i] + descSplit[i] + "\n";
-        else str += " ".repeat(itemWith) + descSplit[i] + "\n";
+        else str += " ".repeat(itemWidth) + descSplit[i] + "\n";
       }
     }
     str = str.replace(/\s+$/, "");
@@ -227,7 +246,9 @@ export class Help {
   private argumentsDescription() {
     return this.metadata.args.map((arg) => {
       const extraInfo = this.extraInfo(arg);
-      arg.description = arg.description ? arg.description + extraInfo : "";
+      arg.description = arg.description
+        ? arg.description + extraInfo
+        : extraInfo;
       return this.formatItem(arg.argumentName, arg.description, true);
     });
   }
@@ -235,7 +256,9 @@ export class Help {
   private optionsDescription() {
     return this.visibleOptions().map((opt) => {
       const extraInfo = this.extraInfo(opt);
-      opt.description = opt.description ? opt.description + extraInfo : "";
+      opt.description = opt.description
+        ? opt.description + extraInfo
+        : extraInfo;
       return this.formatItem(this.formatFlag(opt), opt.description, true);
     });
   }
@@ -264,21 +287,25 @@ export class Help {
       });
     }
 
-    let longItem =
-      (
-        [
-          ...subCommandList.map((el) => el.subCommandUsage),
-          ...this.metadata.options.map((opt) => this.formatFlag(opt)),
-          ...this.metadata.args.map((arg) => arg.argumentName),
-        ] as string[]
-      ).reduce((prev, curr) => (curr.length > prev.length ? curr : prev))
-        .length +
-      1 +
-      this.itemSeparatorWidth +
-      this.itemIndentWidth;
+    // when item width is not provided
+    if (!this.isChangedItemWidth) {
+      let longItem =
+        (
+          [
+            ...subCommandList.map((el) => el.subCommandUsage),
+            ...this.metadata.options.map((opt) => this.formatFlag(opt)),
+            ...this.metadata.args.map((arg) => arg.argumentName),
+          ] as string[]
+        ).reduce((prev, curr) => (curr.length > prev.length ? curr : prev))
+          .length +
+        1 +
+        this.itemSeparatorWidth +
+        this.itemIndentWidth;
 
-    longItem = Math.floor((longItem * 100) / this.windowSize);
-    if (longItem < this.itemWith) this.itemWith = longItem > 10 ? longItem : 10;
+      longItem = Math.floor((longItem * 100) / this.windowSize);
+      if (longItem < this.itemWidth)
+        this.itemWidth = longItem > 10 ? longItem : 10;
+    }
 
     // Arguments
     const argumentlist = this.argumentsDescription();

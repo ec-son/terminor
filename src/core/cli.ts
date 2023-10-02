@@ -115,57 +115,57 @@ export class Cli {
 
         // unknown option
         if (args[0].startsWith("--") || args[0].startsWith("-")) {
-          if (
-            args[0].startsWith("--") &&
-            this.configCli.showSuggestionForUnknownOption
-          ) {
-            let similarWords: string[];
+          // if (
+          //   args[0].startsWith("--") &&
+          //   this.configCli.showSuggestionForUnknownOption
+          // ) {
+          // suggestionHandler(args[0], this.configCli, metadata);
+          // let similarWords: string[];
+          // let suggestSimilarMethod = suggestSimilar;
+          // let showSuggestionMessage = (similarWords: string[]): void => {
+          //   let suggestionMessage = `Did you mean one of ${similarWords.join(
+          //     ", "
+          //   )}?`;
+          //   if (similarWords.length === 1)
+          //     suggestionMessage = `Did you mean ${similarWords[0]}?`;
+          //   throw new KsError(
+          //     [`Unknown option: '${args[0]}'`, "\n" + suggestionMessage],
+          //     { errorType: "UnknownOptionError" }
+          //   );
+          // };
+          // if (
+          //   typeof this.configCli.showSuggestionForUnknownOption === "object"
+          // ) {
+          //   suggestSimilarMethod =
+          //     this.configCli.showSuggestionForUnknownOption
+          //       .custormFunctionSimilar || suggestSimilarMethod;
+          //   showSuggestionMessage =
+          //     this.configCli.showSuggestionForUnknownOption
+          //       .showSuggestionMessage || showSuggestionMessage;
+          // }
+          // const helpAndVersion: string[] = [];
+          // if (!metadata.version?.disabled && metadata.version?.flag)
+          //   helpAndVersion.push(metadata.version.flag);
+          // if (!metadata.help.disabled && metadata.help.flag)
+          //   helpAndVersion.push(metadata.help.flag);
+          // similarWords = suggestSimilarMethod(
+          //   args[0].slice(2),
+          //   [
+          //     ...metadata.options.map((opt) => opt.flag!),
+          //     ...helpAndVersion,
+          //   ].map((opt) => opt.slice(2))
+          // );
+          // if (similarWords.length > 0) {
+          //   showSuggestionMessage(similarWords.map((opt) => "--" + opt));
+          //   terExit();
+          // }
+          // } else
 
-            let suggestSimilarMethod = suggestSimilar;
-            let showSuggestionMessage = (similarWords: string[]): void => {
-              let suggestionMessage = `Did you mean one of ${similarWords.join(
-                ", "
-              )}?`;
-              if (similarWords.length === 1)
-                suggestionMessage = `Did you mean ${similarWords[0]}?`;
-
-              throw new KsError(
-                [`Unknown option: '${args[0]}'`, "\n" + suggestionMessage],
-                { errorType: "UnknownOptionError" }
-              );
-            };
-
-            if (
-              typeof this.configCli.showSuggestionForUnknownOption === "object"
-            ) {
-              suggestSimilarMethod =
-                this.configCli.showSuggestionForUnknownOption
-                  .custormFunctionSimilar || suggestSimilarMethod;
-
-              showSuggestionMessage =
-                this.configCli.showSuggestionForUnknownOption
-                  .showSuggestionMessage || showSuggestionMessage;
-            }
-
-            const helpAndVersion: string[] = [];
-            if (!metadata.version?.disabled && metadata.version?.flag)
-              helpAndVersion.push(metadata.version.flag);
-            if (!metadata.help.disabled && metadata.help.flag)
-              helpAndVersion.push(metadata.help.flag);
-
-            similarWords = suggestSimilarMethod(
-              args[0].slice(2),
-              [
-                ...metadata.options.map((opt) => opt.flag!),
-                ...helpAndVersion,
-              ].map((opt) => opt.slice(2))
-            );
-
-            if (similarWords.length > 0) {
-              showSuggestionMessage(similarWords.map((opt) => "--" + opt));
-              terExit();
-            }
-          } else if (args[0].startsWith("-") && args[0].length > 2) {
+          if (args[0].length < 3)
+            throw new KsError(`Unknown option: '${args[0]}'`, {
+              errorType: "UnknownOptionError",
+            });
+          else if (!args[0].startsWith("--")) {
             // For boolean values
             let optFind = metadata.options.find(
               (el) =>
@@ -184,7 +184,6 @@ export class Cli {
             }
 
             // For other type
-
             optFind = metadata.options.find(
               (el) =>
                 "-" + [...args[0].replace("-", "")][0] === el.alias &&
@@ -201,9 +200,8 @@ export class Cli {
               return this.process(args, metadata);
             }
           }
-          throw new KsError(`Unknown option: '${args[0]}'`, {
-            errorType: "UnknownOptionError",
-          });
+
+          return suggestionHandler(args[0], this.configCli, metadata);
         }
 
         if (args.length > 0) {
@@ -379,7 +377,7 @@ export class Cli {
       return;
     }
 
-    const help = new Help(metadata, subcommand);
+    const help = new Help(metadata, subcommand, this.configCli.helpConfig);
 
     if (metadata.help.addHelpText && metadata.help.addHelpText.text) {
       if (metadata.help.addHelpText.position === "before") {
@@ -434,4 +432,59 @@ function getValueForVariadic(
     } else break;
   }
   return [v, args];
+}
+
+function suggestionHandler(
+  arg: string,
+  configCli: ConfigCli,
+  metadata: MetaDataType
+) {
+  const orgArg = arg;
+  if (arg.startsWith("--")) arg = arg.slice(2);
+  else arg = arg.slice(1);
+
+  let similarWords: string[];
+
+  let suggestSimilarMethod = suggestSimilar;
+  let showSuggestionMessage = (similarWords: string[]): void => {
+    let suggestionMessage = `Did you mean one of ${similarWords.join(", ")}?`;
+    if (similarWords.length === 1)
+      suggestionMessage = `Did you mean ${similarWords[0]}?`;
+
+    throw new KsError([`Unknown option: '${arg}'`, "\n" + suggestionMessage], {
+      errorType: "UnknownOptionError",
+    });
+  };
+
+  if (typeof configCli.showSuggestionForUnknownOption === "object") {
+    suggestSimilarMethod =
+      configCli.showSuggestionForUnknownOption.custormFunctionSimilar ||
+      suggestSimilarMethod;
+
+    showSuggestionMessage =
+      configCli.showSuggestionForUnknownOption.showSuggestionMessage ||
+      showSuggestionMessage;
+  }
+
+  const helpAndVersion: string[] = [];
+  if (!metadata.version?.disabled && metadata.version?.flag)
+    helpAndVersion.push(metadata.version.flag);
+  if (!metadata.help.disabled && metadata.help.flag)
+    helpAndVersion.push(metadata.help.flag);
+
+  similarWords = suggestSimilarMethod(
+    arg,
+    [...metadata.options.map((opt) => opt.flag!), ...helpAndVersion].map(
+      (opt) => opt.slice(2)
+    )
+  );
+
+  if (similarWords.length > 0) {
+    showSuggestionMessage(similarWords.map((opt) => "--" + opt));
+    terExit();
+  }
+
+  throw new KsError(`Unknown option: '${orgArg}'`, {
+    errorType: "UnknownOptionError",
+  });
 }

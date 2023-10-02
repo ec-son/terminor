@@ -46,4 +46,23 @@ export type ConfigCli = {
         ) => string[];
         showSuggestionMessage?: (similarWords: string[]) => void;
       };
+  helpConfig?: HelpConfig;
+};
+
+export type HelpConfig = {
+  windowSize?: number;
+  itemWidth?: number;
+  itemIndentWidth?: number;
+
+  /**
+   * space between term and description
+   */
+  itemSeparatorWidth?: number;
+  extraInfo?:
+    | {
+        showType?: boolean;
+        showDefaultValue?: boolean;
+        showChoice?: boolean;
+      }
+    | boolean;
 };
