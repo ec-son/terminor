@@ -30,7 +30,7 @@ export type ConfigCli = {
         custormFunctionSimilar?: (
           word: string,
           candidates: string[]
-        ) => string | string[];
+        ) => string[];
         showSuggestionMessage?: (similarWords: string[]) => void;
       };
 

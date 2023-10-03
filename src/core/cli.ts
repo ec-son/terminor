@@ -1,7 +1,7 @@
 import { MetaDataType } from "../types/metadata.type";
 import { commandContainer } from "../utils/command-container";
 import { OptionValueType, VersionType } from "../types/option.type";
-import { terExit } from "../tools";
+import { TerData, terExit } from "../tools";
 import { KsError } from "../exceptions/ks-error";
 import { argumentValidator } from "../utils/argument-validator";
 import { ArgumentValueType } from "../types/argument.type";
@@ -61,6 +61,7 @@ export class Cli {
     const command = commandContainer.getCommandByCommandName(
       metadata.commandName
     )?.commandInstance;
+
     if (!command)
       throw new KsError(`Command not found:`, {
         errorType: "CommandNotFoundError",
@@ -112,12 +113,19 @@ export class Cli {
               commandInfo?.commandInstance[commandInfo.index]
             );
           }
-          this.commands.push("--finished--");
+
+          if (metadata.args.length === 0 && metadata.subCommandNames.length > 0)
+            return suggestionUnknownCommandHandler(
+              args[0],
+              this.configCli,
+              metadata
+            );
+          else this.commands.push("--finished--");
         }
 
         // unknown option
         if (args[0].startsWith("--") || args[0].startsWith("-")) {
-          if (args[0].length < 3)
+          if (args[0].length < 3 && !this.configCli.allowUnknownOption)
             throw new KsError(`Unknown option: '${args[0]}'`, {
               errorType: "UnknownOptionError",
             });
@@ -156,21 +164,25 @@ export class Cli {
               return this.process(args, metadata);
             }
           } else if (!this.configCli.allowUnknownOption)
-            return suggestionHandler(args[0], this.configCli, metadata);
+            return suggestionUnknownOptionHandler(
+              args[0],
+              this.configCli,
+              metadata
+            );
 
           // allow unknown option
           const unknownOption: { optionName: string; value: string | boolean } =
             {
-              optionName: args[0],
+              optionName: args[0].replace(/^-+/, ""),
               value: true,
             };
 
           args.shift(); // Removes unknown option
 
           if (
-            args[0] &&
-            !args[0].startsWith("-") &&
-            !metadata.args.find((el) => !el.treated)
+            args.filter((el) => !el.startsWith("-")).length >
+              metadata.args.filter((el) => !el.treated).length &&
+            !args[0].startsWith("-")
           ) {
             unknownOption.value = args[0];
             args.shift(); // Removes unknown option value
@@ -180,7 +192,7 @@ export class Cli {
 
         if (args.length > 0) {
           if (this.isArg) {
-            const result = this.argumentHandler(metadata.args, args, command);
+            const result = this.argumentHandler(metadata.args, args);
             args = Array.isArray(result) ? result : args;
             if (!Array.isArray(result) || result.length < 1) this.isArg = false;
 
@@ -197,31 +209,50 @@ export class Cli {
       }
     }
 
-    console.log("--------------- finished processing ------------------");
-
     [...metadata.options, ...metadata.args].forEach((el) => {
       el.value = argumentValidator(undefined, el);
       if (el.value === undefined && el.variadic) el.value = [];
       el.treated = true;
     });
 
-    console.log(
-      "options:",
-      metadata.options.map((el) => ({ [el.optionName]: el.value }))
-    );
+    const options: { [key: string]: any } = {};
+    for (const opt of metadata.options) {
+      options[opt.optionName] = opt.value;
+    }
 
-    console.log(
-      "arguments:",
-      metadata.args.map((el) => ({ [el.argumentName]: el.value }))
-    );
+    const argums: Array<{ argumentName: string; value: any }> =
+      metadata.args.map((arg) => ({
+        argumentName: arg.argumentName,
+        value: arg.value,
+      }));
 
-    if (this.unknownOptions.length > 0)
-      console.log("unknownOptions:", this.unknownOptions);
+    const dataObj = new TerData({
+      arguments: argums,
+      options,
+      excessArguments: this.excessArguments,
+      unknownOptions: this.unknownOptions,
+    });
 
-    if (this.excessArguments.length > 0)
-      console.log("excessArguments:", this.excessArguments);
+    if (command["handler"]) command["handler"](dataObj);
 
-    // check required arguments and options
+    // console.log("--------------- finished processing ------------------");
+
+    // console.log(
+    //   "options:",
+    //   metadata.options.map((el) => ({ [el.optionName]: el.value }))
+    // );
+
+    // console.log(
+    //   "arguments:",
+    //   metadata.args.map((el) => ({ [el.argumentName]: el.value }))
+    // );
+
+    // if (this.unknownOptions.length > 0)
+    //   console.log("unknownOptions:", this.unknownOptions);
+
+    // if (this.excessArguments.length > 0)
+    //   console.log("excessArguments:", this.excessArguments);
+
     // execute the command
   }
 
@@ -262,8 +293,7 @@ export class Cli {
 
   private argumentHandler(
     argsOpt: Array<ArgumentValueType>,
-    args: string[],
-    command: Object
+    args: string[]
   ): Array<string> | null {
     if (!args || args.length === 0) return null;
 
@@ -380,7 +410,7 @@ function getValueForVariadic(
   return [v, args];
 }
 
-function suggestionHandler(
+function suggestionUnknownOptionHandler(
   arg: string,
   configCli: ConfigCli,
   metadata: MetaDataType
@@ -438,3 +468,59 @@ function suggestionHandler(
     errorType: "UnknownOptionError",
   });
 }
+
+function suggestionUnknownCommandHandler(
+  subCommandName: string,
+  configCli: ConfigCli,
+  metadata: MetaDataType
+) {
+  if (configCli.showSuggestionForUnknownCommand) {
+    let similarWords: string[];
+
+    let suggestSimilarMethod = suggestSimilar;
+    let showSuggestionMessage = (similarWords: string[]): void => {
+      let suggestionMessage = `Did you mean one of ${similarWords.join(", ")}?`;
+      if (similarWords.length === 1)
+        suggestionMessage = `Did you mean ${similarWords[0]}?`;
+
+      throw new KsError(
+        [`Unknown command: '${subCommandName}'`, "\n" + suggestionMessage],
+        {
+          errorType: "UnknownCommandError",
+        }
+      );
+    };
+
+    if (typeof configCli.showSuggestionForUnknownCommand === "object") {
+      suggestSimilarMethod =
+        configCli.showSuggestionForUnknownCommand.custormFunctionSimilar ||
+        suggestSimilarMethod;
+
+      showSuggestionMessage =
+        configCli.showSuggestionForUnknownCommand.showSuggestionMessage ||
+        showSuggestionMessage;
+    }
+
+    similarWords = suggestSimilarMethod(
+      subCommandName,
+      metadata.subCommandNames
+    );
+
+    if (similarWords.length > 0) {
+      showSuggestionMessage(similarWords.map((el) => el));
+      terExit();
+    }
+  }
+  throw new KsError(`Unknown command: '${subCommandName}'`, {
+    errorType: "UnknownCommandError",
+  });
+}
+
+// create function to add two variables
+
+/**
+ * In order to remove abuse of the product and make sure that we know you are an early user,
+ * we ask to authorize Codeium extensions with an account before use.
+ * We do not use, share, or sell any identifying information for any purpose.
+ * eyJhbGciOiJSUzI1NiIsImtpZCI6IjlhNTE5MDc0NmU5M2JhZTI0OWIyYWE3YzJhYTRlMzA2M2UzNDFlYzciLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYW1pc3NpIGVjLXNvbiIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9leGEyLWZiMTcwIiwiYXVkIjoiZXhhMi1mYjE3MCIsImF1dGhfdGltZSI6MTY5NjMxODU1NCwidXNlcl9pZCI6Imw3bG9CYkhFMmpPYmZGeE5hUHJUSUdkNTJ5RjIiLCJzdWIiOiJsN2xvQmJIRTJqT2JmRnhOYVByVElHZDUyeUYyIiwiaWF0IjoxNjk2MzE4NTc3LCJleHAiOjE2OTYzMjIxNzcsImVtYWlsIjoidXNlbmllY3NvbkBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidXNlbmllY3NvbkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.WPBB2a2IUNNGOLBES4Q_dND8ztN5DYAFMse2m_mx-7NWD8Tc3za6g12ByuRUhfYNQ6-TRr88-MjNKh7lwvzniOxpPGoDm1UmLk3yFn95ngzhdb2ieDT7BfZbmLOGAdwHzQQVPKsUSEP-Pv6IFURG0C8I8R9Vpw6DogfoWjO1uOHFGdFmBGnxGaEmQSxzI8EWE0mDP97BB5E8helEe2g285sIYPt3OjRR47JZ3Z6g_HhzM1FUSYaXJ51gTrvMO6iR4jCQYsB_mVVfaK0FstrGH98IfSfSQ203Xwq3TOy4avl50TwocBLJOXGwEkzqTsUBN9Sk1gW09Rq14xoayE0lSw
+ */
