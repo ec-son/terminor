@@ -66,3 +66,10 @@ export type HelpConfig = {
       }
     | boolean;
 };
+
+export type EventType =
+  | "handler"
+  | "post_action"
+  | "pre_action"
+  | "on_option"
+  | "on_argument";

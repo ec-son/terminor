@@ -14,13 +14,13 @@ export class Cli {
     };
     // commandContainer.setCommand(appInfo);
 
-    app.init(program);
+    app.__init__(program);
 
     commandContainer.forEach((commandInfo) => {
       if (commandInfo.name === AppComponent.name) {
         return;
       }
-      commandInfo.commandInstance["init"](commandInfo.commandInstance);
+      commandInfo.commandInstance["__init__"](commandInfo.commandInstance);
     });
 
     commandContainer.forEach((commandInfo) => {

@@ -51,10 +51,19 @@ export function commandInit(
     alias: context.alias,
     args,
     commandName: context.commandName,
+    excessArguments: [],
     help,
+    handlers: [
+      {
+        methodKey: "handler",
+        on: "handler",
+        parameters: [],
+      },
+    ],
     options: [],
     subCommandNames,
     description: context.description,
+    unknownOptions: [],
     usage: context.usage,
   };
 

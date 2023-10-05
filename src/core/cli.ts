@@ -13,8 +13,8 @@ import { checkValueType } from "../utils/check-value-type";
 export class Cli {
   appMetadata: MetaDataType;
   args: Array<string>;
-  unknownOptions: Array<{ optionName: string; value: string | boolean }> = [];
-  excessArguments: Array<string> = [];
+  // unknownOptions: Array<{ optionName: string; value: string | boolean }> = [];
+  // excessArguments: Array<string> = [];
   isArg: boolean = true;
   configCli: ConfigCli = {
     argv: {
@@ -37,7 +37,7 @@ export class Cli {
       index,
     });
 
-    commandInstance.init();
+    commandInstance.__init__();
     this.appMetadata =
       commandInstance[
         commandContainer.getCommand(commandInstance)?.index as any
@@ -187,7 +187,7 @@ export class Cli {
             unknownOption.value = args[0];
             args.shift(); // Removes unknown option value
           }
-          this.unknownOptions.push(unknownOption);
+          metadata.unknownOptions.push(unknownOption);
         }
 
         if (args.length > 0) {
@@ -200,8 +200,7 @@ export class Cli {
           } else {
             if (!this.configCli.allowExcessArguments)
               throw new KsError(`Unknown arg '${args}'`);
-
-            this.excessArguments.push(args[0]);
+            metadata.excessArguments.push(args[0]);
             args.shift(); // Removes excess argument
             return this.process(args, metadata);
           }
@@ -215,25 +214,57 @@ export class Cli {
       el.treated = true;
     });
 
-    const options: { [key: string]: any } = {};
-    for (const opt of metadata.options) {
-      options[opt.optionName] = opt.value;
+    // console.log(metadata.unknownOptions);
+    // console.log(metadata.excessArguments);
+    // console.log(metadata.handlers[0].parameters);
+
+    // if(this.configCli.allowUnknownOption && this.unknownOptions.length > 0)
+
+    // const options: { [key: string]: any } = {};
+    // for (const opt of metadata.options) {
+    //   options[opt.optionName] = opt.value;
+    // }
+
+    // const argums: Array<{ argumentName: string; value: any }> =
+    //   metadata.args.map((arg) => ({
+    //     argumentName: arg.argumentName,
+    //     value: arg.value,
+    //   }));
+
+    // const dataObj = new TerData({
+    //   arguments: argums,
+    //   options,
+    //   excessArguments: this.excessArguments,
+    //   unknownOptions: this.unknownOptions,
+    // });
+
+    const preActions = metadata.handlers.filter((el) => el.on === "pre_action");
+    if (preActions.length > 0) {
     }
 
-    const argums: Array<{ argumentName: string; value: any }> =
-      metadata.args.map((arg) => ({
-        argumentName: arg.argumentName,
-        value: arg.value,
-      }));
+    const onArgOpt = metadata.handlers.filter(
+      (el) => el.on === "on_argument" || el.on === "on_option"
+    );
+    if (onArgOpt.length > 0) {
+    }
 
-    const dataObj = new TerData({
-      arguments: argums,
-      options,
-      excessArguments: this.excessArguments,
-      unknownOptions: this.unknownOptions,
-    });
+    const handlers = metadata.handlers.filter((el) => el.on === "handler");
+    if (handlers.length > 0) {
+      for (const handler of handlers) {
+        if (command[handler.methodKey])
+          command[handler.methodKey](...getParameters(handler.parameters));
+      }
+    }
 
-    if (command["handler"]) command["handler"](dataObj);
+    const postActions = metadata.handlers.filter(
+      (el) => el.on === "post_action"
+    );
+    if (postActions.length > 0) {
+    }
+    // console.log(metadata.handlers[0].parameters[0]);
+    // console.log(getParameters(metadata.handlers[0].parameters));
+
+    // if (command["handler"]) command["handler"](dataObj);
 
     // console.log("--------------- finished processing ------------------");
 
@@ -263,6 +294,7 @@ export class Cli {
   ): Array<string> {
     if (opt.type === "boolean") {
       opt.value = true;
+      command[opt.optionName] = true;
       opt.treated = true;
       args.shift();
       return args;
@@ -516,6 +548,54 @@ function suggestionUnknownCommandHandler(
   });
 }
 
+function getParameters(
+  parameters: {
+    argOpt?:
+      | ArgumentValueType
+      | OptionValueType
+      | Array<string>
+      | Array<ArgumentValueType | OptionValueType>
+      | Array<{ optionName: string; value: any }>;
+    flag: "args" | "options" | "unknown_option" | "excess_argument";
+    index: number;
+  }[]
+): Array<any> {
+  const params: Array<any> = [];
+  for (const param of parameters) {
+    if (!param.argOpt) {
+      params[param.index] = undefined;
+      continue;
+    }
+
+    if (param.flag === "excess_argument") {
+      params[param.index] = param.argOpt;
+      continue;
+    }
+
+    if (param.flag === "unknown_option") {
+      params[param.index] = {};
+      for (const iter of param.argOpt as Array<{
+        optionName: string;
+        value: any;
+      }>) {
+        params[param.index][iter.optionName] = iter.value;
+      }
+      continue;
+    }
+
+    if (!Array.isArray(param.argOpt)) params[param.index] = param.argOpt.value;
+    else {
+      params[param.index] = {};
+      for (const iter of param.argOpt) {
+        const argOptName = iter["argumentName"]
+          ? iter["argumentName"]
+          : iter["optionName"];
+        params[param.index][argOptName] = iter["value"];
+      }
+    }
+  }
+  return params;
+}
 // create function to add two variables
 
 /**

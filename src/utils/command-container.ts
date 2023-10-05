@@ -1,4 +1,3 @@
-import { command } from "yargs";
 import { KsError } from "../exceptions/ks-error";
 import { CommandInfoType } from "../types/command-info.type";
 import { MetaDataType } from "../types/metadata.type";

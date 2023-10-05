@@ -11,10 +11,10 @@ export function Option(
   _opt?: Omit<OptionType, "type" | "optionName"> &
     Partial<Pick<OptionType, "type" | "optionName">>
 ) {
-  return function (target, propertyName: string) {
-    const originalInitFunction: Function = target.init || function () {};
-    target.init = function () {
-      const option = { ..._opt, propertyName };
+  return function (target: any, propertyKey: string) {
+    const originalInitFunction: Function = target.__init__ || function () {};
+    target.__init__ = function () {
+      const option = { ..._opt, propertyName: propertyKey };
       option.optionName = option.optionName || option.propertyName;
 
       const { flag, alias } = formatOptionFlag(
@@ -25,10 +25,10 @@ export function Option(
       if (!option.type) {
         if (
           (["boolean", "date", "number", "string"] as ValidType[]).includes(
-            typeof this[propertyName] as ValidType
+            typeof this[propertyKey] as ValidType
           )
         )
-          option.type = typeof this[propertyName] as ValidType;
+          option.type = typeof this[propertyKey] as ValidType;
         else option.type = "boolean";
       }
 
@@ -50,8 +50,8 @@ export function Option(
         commandInfo?.name
       );
 
-      if (!option.default && this[propertyName] !== undefined)
-        option.default = this[propertyName];
+      if (!option.default && this[propertyKey] !== undefined)
+        option.default = this[propertyKey];
 
       if (option.default) {
         if (
