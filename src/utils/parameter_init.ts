@@ -49,6 +49,10 @@ export function parameterInit(
       }
     }
 
+    const findIndex = mtd.parameters.findIndex(
+      (el) => el.index === parameterIndex
+    );
+    if (findIndex > -1) mtd.parameters.splice(findIndex, 1);
     mtd.parameters.push(arg);
 
     originalInitFunction.call(this);

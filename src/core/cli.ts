@@ -6,7 +6,7 @@ import { KsError } from "../exceptions/ks-error";
 import { argumentValidator } from "../utils/argument-validator";
 import { ArgumentValueType } from "../types/argument.type";
 import { suggestSimilar } from "../utils/suggest-similar";
-import { ConfigCli } from "../types/config-cli.type";
+import { ConfigCli, EventType } from "../types/config-cli.type";
 import { Help } from "./help";
 import { checkValueType } from "../utils/check-value-type";
 
@@ -239,28 +239,28 @@ export class Cli {
     // });
 
     const preActions = metadata.handlers.filter((el) => el.on === "pre_action");
-    if (preActions.length > 0) {
-    }
+    actionHandler(preActions, command);
 
-    const onArgOpt = metadata.handlers.filter(
-      (el) => el.on === "on_argument" || el.on === "on_option"
-    );
-    if (onArgOpt.length > 0) {
-    }
+    const onArgOpt = metadata.handlers.filter((el) => {
+      if (el.on === "argument" || el.on === "option") {
+        const flag = el.on === "argument" ? "args" : "options";
+        return metadata[flag].find((e) => {
+          const _name = e["argumentName"] ? e["argumentName"] : e["optionName"];
+          return _name === el.trigger && typeof e.value !== "undefined";
+        });
+      }
+    });
+
+    actionHandler(onArgOpt, command);
 
     const handlers = metadata.handlers.filter((el) => el.on === "handler");
-    if (handlers.length > 0) {
-      for (const handler of handlers) {
-        if (command[handler.methodKey])
-          command[handler.methodKey](...getParameters(handler.parameters));
-      }
-    }
+    actionHandler(handlers, command);
 
     const postActions = metadata.handlers.filter(
       (el) => el.on === "post_action"
     );
-    if (postActions.length > 0) {
-    }
+    actionHandler(postActions, command);
+
     // console.log(metadata.handlers[0].parameters[0]);
     // console.log(getParameters(metadata.handlers[0].parameters));
 
@@ -595,6 +595,21 @@ function getParameters(
     }
   }
   return params;
+}
+
+function actionHandler(
+  actions: Array<{
+    methodKey: string | symbol;
+    on: EventType;
+    trigger?: string | string[] | undefined;
+    parameters: any[];
+  }>,
+  command: Object
+) {
+  for (const action of actions.reverse()) {
+    if (command[action.methodKey])
+      command[action.methodKey](...getParameters(action.parameters));
+  }
 }
 // create function to add two variables
 
