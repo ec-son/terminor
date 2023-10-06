@@ -1,16 +1,14 @@
-import { Argument, Command } from "commander";
 import { KsError } from "../exceptions/ks-error";
-import { argumentValidator } from "./argument-validator";
 import { choiceVerifing } from "./choice-verification";
 import { ArgumentType } from "../types/argument.type";
+import { isEqual } from "./is-equal";
 
 export const processArgument = (
   args: Array<ArgumentType> | undefined,
-  command: Command,
   commandName: string
 ): Array<ArgumentType> => {
   if (!args?.length) args = [];
-  args.forEach((argument) => {
+  for (const argument of args) {
     choiceVerifing(
       argument.type,
       argument.choices || [],
@@ -18,23 +16,26 @@ export const processArgument = (
       commandName
     );
 
-    const dateDesc =
-      argument.type === Date ? "  (e.g. YYYY-MM-DD = 2015-03-31)" : "";
-    const newArg = new Argument(
-      argument.argumentName,
-      (argument.description || "") + dateDesc
-    );
+    if (!argument.type) argument.type = "string";
+
+    if (argument.type === "date") {
+      const dateDesc =
+        argument.type === "date" ? " (e.g. YYYY-MM-DD = 2015-03-31)" : "";
+      argument.description = (argument.description || "") + dateDesc;
+    }
+
+    argument.description = argument.description?.trim();
 
     if (argument.default) {
       if (
         argument?.choices &&
         argument?.choices?.length > 0 &&
-        !argument.choices.includes(argument.default)
+        !argument.choices.find((el) => isEqual(el, argument.default))
       ) {
         throw new KsError(
-          `The default value provided is not valid according to the available choices. Valid choices are: ${argument.choices.join(
-            ", "
-          )}`,
+          `The default value provided is not valid according to the available choices. Valid choices are: ${argument.choices
+            .map((el) => JSON.stringify(el))
+            .join(", ")}`,
           {
             type: "error",
             errorType: "InvalidDefaultValueError",
@@ -43,15 +44,27 @@ export const processArgument = (
         );
       }
       choiceVerifing(argument.type, [argument.default], "default", commandName);
-      // newArg.default(argument.default);
     }
 
-    // newArg.required = argument.required || false;
-    newArg.required = false;
+    switch (argument.argumentName[0]) {
+      case "<": // e.g. <required>
+        argument.required = true;
+        argument.argumentName = argument.argumentName.slice(1, -1);
+        break;
+      case "[": // e.g. [optional]
+        argument.required = false;
+        argument.argumentName = argument.argumentName.slice(1, -1);
+        break;
+    }
 
-    newArg.argParser((value: any) => argumentValidator(value, argument));
-    command.addArgument(newArg);
-  });
+    if (
+      argument.argumentName.length > 3 &&
+      argument.argumentName.endsWith("...")
+    ) {
+      argument.variadic = true;
+      argument.argumentName = argument.argumentName.slice(0, -3);
+    }
+  }
 
   return args;
 };

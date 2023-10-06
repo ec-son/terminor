@@ -1,35 +1,48 @@
 import { green } from "ansi-colors";
 import { KsError } from "../exceptions/ks-error";
-import { checkValueType, getValueType } from "./check-value-type";
-import { BaseOptionArgumentInterface } from "../types/base-option-argument.type";
+import { checkValueType } from "./check-value-type";
 import { terExit } from "../tools";
-import { ValidType } from "../types/utilities.type";
+import { ValidType } from "../types/valid.type";
+import { OptionValueType } from "../types/option.type";
+import { ArgumentValueType } from "../types/argument.type";
+import { isEqual } from "./is-equal";
 
 /**
  * used for validation of value
- * @param value The value to be checked
  * @param argument metadata of argument to be used when checking
- * @param flag used to check whether value is argument or option
  * @returns
  */
 export function argumentValidator(
   value: any,
-  argument: BaseOptionArgumentInterface & {
-    type: ValidType;
-    optionName?: string;
-    argumentName?: string;
-  },
-  flag?: "opt" | "arg"
-) {
-  if (flag === "opt" && argument.type === Boolean) return value;
+  argument: OptionValueType | ArgumentValueType
+): any {
+  if (argument.treated) return argument.value;
+  if (argument["flag"] && argument.type === "boolean") return !!value;
+
+  if (argument.trim) value = value?.trim();
+
+  if (!value) {
+    if (argument.default) return argument.default;
+    if (argument.required)
+      throw new KsError(
+        (argument.onError && argument.onError(value, "MissingValueError")) ||
+          `Missing value for required ${
+            argument["flag"] ? "option" : "argument"
+          } '${argument["argumentName"] || argument["optionName"]}'`,
+        {
+          errorType: "MissingValueError",
+        }
+      );
+    return undefined;
+  }
 
   if (argument.validator) {
     const result = argument.validator(value, () => {
-      validator(value, argument, flag);
+      validator(value, argument);
     });
 
     if (typeof result === "boolean" && !result) terExit();
-  } else validator(value, argument, flag);
+  } else validator(value, argument);
 
   if (argument.transform) {
     return argument.transform(value, () => {
@@ -38,32 +51,29 @@ export function argumentValidator(
   } else return transform(value, argument.type);
 }
 
-export function transformDefaultValue(
-  argument: BaseOptionArgumentInterface & { type: ValidType }
-) {
-  if (argument.transform) {
-    return argument.transform(argument.default, () => {
-      return transform(argument.default, argument.type);
-    });
-  } else return transform(argument.default, argument.type);
-}
+// export function transformDefaultValue(
+//   argument: BaseOptionArgumentInterface & { type: ValidType }
+// ) {
+//   if (argument.transform) {
+//     return argument.transform(argument.default, () => {
+//       return transform(argument.default, argument.type);
+//     });
+//   } else return transform(argument.default, argument.type);
+// }
 
 function validator(
   value: any,
-  argument: BaseOptionArgumentInterface & {
-    type: ValidType;
-    optionName?: string;
-    argumentName?: string;
-  },
-  flag?: "opt" | "arg"
+  argument: OptionValueType | ArgumentValueType
 ): void {
-  const _name = argument.argumentName || argument.optionName;
+  const flag = argument["flag"] ? "opt" : "arg";
+  const _name = argument["argumentName"] || argument["optionName"];
+
   if (!checkValueType(argument.type, value)) {
     throw new KsError(
       (argument.onError && argument.onError(value, "InvalidTypeError")) ||
         `The ${green("'" + _name + "'")} ${
           flag && flag === "opt" ? "option" : "argument"
-        } must be a ${getValueType(argument.type)}`,
+        } must be a ${argument.type}`,
       {
         type: "error",
         errorType: "InvalidTypeError",
@@ -71,23 +81,25 @@ function validator(
     );
   }
 
-  if (argument.type === Number) value = parseFloat(value);
-  else if (argument.type === Date) value = new Date(value);
+  if (argument.type === "number") value = parseFloat(value);
+  else if (argument.type === "date") value = new Date(value);
 
-  if (argument.choices && !argument.choices.includes(value)) {
+  if (argument.choices && !argument.choices.find((el) => isEqual(el, value))) {
     throw new KsError(
       (argument.onError && argument.onError(value, "InvalidChoiceError")) ||
         `The value provided for ${green("'" + _name + "'")} ${
           flag && flag === "opt" ? "option" : "argument"
-        } is not valid. Valid choices are: ${argument.choices.join(", ")}`,
+        } is not valid. Valid choices are: ${argument.choices
+          .map((el) => JSON.stringify(el))
+          .join(", ")}`,
       { type: "error", errorType: "InvalidChoiceError" }
     );
   }
 }
 
 function transform(value: any, type: ValidType): any {
-  if (type === Number) value = parseFloat(value);
-  else if (type === Date) value = new Date(value);
+  if (type === "number") value = parseFloat(value);
+  else if (type === "date") value = new Date(value);
 
   return value;
 }

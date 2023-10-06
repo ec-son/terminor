@@ -1,50 +1,54 @@
-import { ArgumentType } from "../../src/types/argument.type";
-import {
-  argumentValidator,
-  transformDefaultValue,
-} from "../../src/utils/argument-validator";
+import { ArgumentType, ArgumentValueType } from "../../src/types/argument.type";
+import { argumentValidator } from "../../src/utils/argument-validator";
 import * as tools from "../../src/tools/ter-exit";
 
 const mockTerExit = jest.spyOn(tools, "terExit");
 
 /**
  * argumentValidator
- * transformDefaultValue
  */
 
 describe("argument validation and transform", () => {
   const table1: Array<
-    { value: any; expected: any } & Pick<ArgumentType, "type" | "transform">
+    { expected: any } & Pick<ArgumentValueType, "type" | "transform" | "value">
   > = [
-    { value: "1", type: Number, expected: 1 },
+    { value: "1", type: "number", expected: 1 },
     {
       value: "7",
-      type: Number,
+      type: "number",
       transform(value, transform) {
         const age = transform() as number;
         return age + 3;
       },
       expected: 10,
     },
-    { value: "2000/3/5", type: Date, expected: new Date("2000/3/5") },
-    { value: "text", type: String, expected: "text" },
+    { value: "2000/3/5", type: "date", expected: new Date("2000/3/5") },
+    { value: "text", type: "string", expected: "text" },
   ];
 
   it.each(table1)(
     "should a valid value",
     ({ value, type, transform, expected }) => {
-      if (type === Number)
-        expect(argumentValidator(value, { type, transform })).toBe(expected);
-      else if (type === Date)
-        expect(argumentValidator(value, { type })).toEqual(expected);
-      else expect(argumentValidator(value, { type })).toMatch(expected);
+      if (type === "number")
+        expect(
+          argumentValidator(value, { type, transform, argumentName: "" })
+        ).toBe(expected);
+      else if (type === "date")
+        expect(argumentValidator(value, { type, argumentName: "" })).toEqual(
+          expected
+        );
+      else
+        expect(argumentValidator(value, { type, argumentName: "" })).toMatch(
+          expected
+        );
     }
   );
 
   it("should call terExit function", () => {
     mockTerExit.mockImplementationOnce(jest.fn());
     argumentValidator("text", {
-      type: Number,
+      argumentName: "",
+      type: "number",
       validator(value, validator) {
         return typeof value === "number";
       },
@@ -54,7 +58,7 @@ describe("argument validation and transform", () => {
   });
 
   const table2 = [
-    { flag: "arg" as const, expected: "argument" },
+    { flag: undefined, expected: "argument" },
     { flag: "opt" as const, expected: "option" },
   ];
   it.each(table2)(
@@ -62,14 +66,11 @@ describe("argument validation and transform", () => {
     ({ flag, expected }) => {
       const regExp = new RegExp(`The .*age.* ${expected} .* number`);
       expect(() =>
-        argumentValidator(
-          "text",
-          {
-            type: Number,
-            argumentName: "age",
-          },
-          flag
-        )
+        argumentValidator("text", {
+          type: "number",
+          argumentName: "age",
+          flag,
+        })
       ).toThrow(regExp);
     }
   );
@@ -77,7 +78,8 @@ describe("argument validation and transform", () => {
   it("should throw with personalized error", () => {
     expect(() =>
       argumentValidator("text", {
-        type: Number,
+        argumentName: "",
+        type: "number",
         onError(value, errorType) {
           return "error of value";
         },
@@ -88,20 +90,22 @@ describe("argument validation and transform", () => {
   const table3: Array<
     { value: any } & Pick<ArgumentType, "type" | "transform">
   > = [
-    { value: "text", type: Number },
-    { value: "text", type: Date },
+    { value: "text", type: "number" },
+    { value: "text", type: "date" },
   ];
 
   it.each(table3)(
     "should throw when value is not a expected type",
     ({ value, type }) => {
-      expect(() => argumentValidator(value, { type })).toThrow();
+      expect(() =>
+        argumentValidator(value, { type, argumentName: "" })
+      ).toThrow();
     }
   );
 
-  it("should treat default values", () => {
-    expect(transformDefaultValue({ type: Date, default: "2000/3/5" })).toEqual(
-      new Date("2000/3/5")
-    );
-  });
+  // it("should treat default values", () => {
+  //   expect(
+  //     transformDefaultValue({ type: "date", default: "2000/3/5" })
+  //   ).toEqual(new Date("2000/3/5"));
+  // });
 });

@@ -1,7 +1,7 @@
 import exception from "./exceptions/exception";
 exception();
 
-export * from "./cli";
+export * from "./core";
 export * from "./decorators";
 export * from "./types";
 export * from "./tools";

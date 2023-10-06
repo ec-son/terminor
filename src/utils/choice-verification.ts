@@ -1,5 +1,5 @@
 import { KsError } from "../exceptions/ks-error";
-import { ValidType } from "../types/utilities.type";
+import { ValidType } from "../types/valid.type";
 
 export function choiceVerifing(
   valueType: ValidType,
@@ -8,21 +8,28 @@ export function choiceVerifing(
   commandName?: string
 ) {
   for (const value of choices) {
-    if (valueType === Number) {
-      if (typeof value !== "number")
-        throwException(value, flag, commandName, "number");
-    } else if (valueType === Boolean) {
-      if (typeof value !== "boolean")
-        throwException(value, flag, commandName, "boolean");
-    } else if (valueType === Date) {
-      if (!(value instanceof Date))
-        throwException(value, flag, commandName, "Date");
-    } else if (valueType === String) {
-      if (typeof value !== "string")
-        throwException(value, flag, commandName, "string");
-    } else {
-      throwException(value, flag, commandName);
-    }
+    if (
+      typeof value === valueType ||
+      (valueType === "date" && value instanceof Date)
+    )
+      break;
+    throwException(value, flag, commandName, valueType);
+    // if(valueType === 'date' && !(value instanceof Date))
+    // if (valueType === "number") {
+    //   if (typeof value !== "number")
+    //     throwException(value, flag, commandName, "number");
+    // } else if (valueType === "boolean") {
+    //   if (typeof value !== "boolean")
+    //     throwException(value, flag, commandName, "boolean");
+    // } else if (valueType === "date") {
+    //   if (!(value instanceof Date))
+    //     throwException(value, flag, commandName, "Date");
+    // } else if (valueType === "string") {
+    //   if (typeof value !== "string")
+    //     throwException(value, flag, commandName, "string");
+    // } else {
+    //   throwException(value, flag, commandName);
+    // }
   }
 }
 
@@ -30,7 +37,7 @@ function throwException(
   value: string | number | boolean | Date,
   flag: string,
   commandName?: string,
-  type?: "number" | "string" | "boolean" | "Date"
+  type?: ValidType
 ) {
   const msg = `${
     flag === "choice"

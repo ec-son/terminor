@@ -1,6 +1,12 @@
 import { BaseOptionArgumentInterface } from "./base-option-argument.type";
+import { ValidType } from "./valid.type";
 
-export interface ArgumentType extends BaseOptionArgumentInterface {
-  type: NumberConstructor | StringConstructor | DateConstructor;
+export type ArgumentType = BaseOptionArgumentInterface & {
+  type: Exclude<ValidType, "boolean">;
   argumentName: string;
-}
+};
+
+export type ArgumentValueType = ArgumentType & {
+  value?: any;
+  treated?: boolean;
+};

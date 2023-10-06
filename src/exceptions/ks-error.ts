@@ -2,6 +2,7 @@ interface OptionErrorType {
   type?: "error" | "warning" | "info";
   errorType?:
     | "CommandInitializationError"
+    | "CommandNotFoundError"
     | "InvalidTypeError"
     | "InvalidChoiceError"
     | "InvalidTypeError"
@@ -9,12 +10,16 @@ interface OptionErrorType {
     | "UndefinedOptionNameError"
     | "MethodNotFoundError"
     | "MissingValueError"
-    | "DuplicateItemError";
+    | "DuplicateItemError"
+    | "UnknownOptionError"
+    | "UnknownCommandError"
+    | "UnknownArgumentError";
   commandName?: string;
 }
 export class KsError extends Error {
-  constructor(public message: string, private opt?: OptionErrorType) {
-    super(message);
+  constructor(message: string | string[], private opt?: OptionErrorType) {
+    if (!Array.isArray(message)) message = [message];
+    super(message.join("\n"));
   }
 
   get type() {

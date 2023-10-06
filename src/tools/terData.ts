@@ -1,27 +1,41 @@
-type ArgDataType = { name: string; value: any };
+type ArgDataType = { argumentName: string; value: any };
 type OptDataType = { [key: string]: any };
+type UnknownOption = { optionName: string; value: any };
+
+type DataArgType = {
+  arguments: ArgDataType[];
+  options: OptDataType;
+  unknownOptions?: UnknownOption[];
+  excessArguments?: String[];
+};
 
 export class TerData {
-  constructor(
-    private readonly args?: Array<ArgDataType>,
-    private readonly opts?: OptDataType
-  ) {}
+  private readonly arguments?: ArgDataType[] = [];
+  private readonly options?: OptDataType = {};
+  private readonly unknownOptions?: UnknownOption[] = [];
+  private readonly excessArguments?: String[] = [];
+
+  constructor(data?: DataArgType) {
+    for (const key of Object.keys(data || {})) {
+      this[key] = data![key];
+    }
+  }
 
   /**
-   * Retrieve argument value.
+   * Retrieves argument value.
    * @param {string} argumentName The name of the argument to retrieve.
    * @returns {ArgDataType | undefined} The value of the argument if found, otherwise undefined.
    */
   getArgument(argumentName: string): ArgDataType | undefined {
-    return this.args?.find((value) => value.name === argumentName);
+    return this.arguments?.find((value) => value.argumentName === argumentName);
   }
 
   /**
-   * Retrieve an array of all available arguments.
+   * Retrieves an array of all available arguments.
    * @returns {Array<ArgDataType>} An array containing all available arguments.
    */
   getAllArguments(): ArgDataType[] {
-    return this.args || [];
+    return this.arguments || [];
   }
 
   /**
@@ -39,7 +53,7 @@ export class TerData {
     ) => void,
     thisArg?: any
   ): void | undefined {
-    this.args?.forEach(callbackfn, thisArg);
+    this.arguments?.forEach(callbackfn, thisArg);
   }
 
   /**
@@ -48,7 +62,7 @@ export class TerData {
    * @returns {OptDataType | undefined} The value of the argument if found, otherwise undefined.
    */
   getOption(optionName: string): OptDataType | undefined {
-    return this.opts && this.opts[optionName];
+    return this.options && this.options[optionName];
   }
 
   /**
@@ -56,6 +70,6 @@ export class TerData {
    * @returns {ArgDataType} An array containing all available options.
    */
   getAllOptions(): OptDataType {
-    return this.opts || {};
+    return this.options || {};
   }
 }

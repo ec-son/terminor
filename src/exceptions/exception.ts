@@ -34,7 +34,7 @@ function throwException(
   message: string,
   opt?: any
 ): void {
-  console.log(redBright(underline(`${flag}:`)), gray(typeError), "\n");
+  console.log("\n" + redBright(underline(`${flag}:`)), gray(typeError), "\n");
   console.log(message);
   if (opt.commandName) console.log(`\nIn the ${cyan(opt.commandName)} class.`);
 }

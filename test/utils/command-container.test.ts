@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { MetaDataType } from "../../src/types/metadata.type";
 import { commandContainer } from "../../src/utils/command-container";
 
 /**
@@ -10,36 +10,28 @@ import { commandContainer } from "../../src/utils/command-container";
  */
 describe("command container", () => {
   commandContainer.setCommand({
-    commandInstance: new Command("text1"),
-    controllerInstance: "text1",
-    commandNameIndex: Symbol(),
+    commandInstance: "text1",
+    index: Symbol(),
     name: "text1",
-    optionIndex: Symbol(),
-    subCommandIndex: Symbol(),
   });
 
   const mockFunction = jest.fn();
 
   const command1 = {
-    commandInstance: new Command("text2"),
-    controllerInstance: "text2",
-    commandNameIndex: Symbol(),
+    commandInstance: "text2",
     name: "text2",
-    optionIndex: Symbol(),
-    subCommandIndex: Symbol(),
+    index: Symbol(),
   };
 
   const command2 = {
-    commandInstance: new Command("text3"),
-    controllerInstance: mockFunction,
-    commandNameIndex: Symbol(),
+    commandInstance: mockFunction,
     name: "text3",
-    optionIndex: Symbol(),
-    subCommandIndex: Symbol(),
+    index: Symbol(),
   };
   commandContainer.setCommand(command1);
   commandContainer.setCommand(command2);
-  mockFunction[command2.commandNameIndex] = "text_3";
+
+  mockFunction[command2.index] = { commandName: "text_3" } as MetaDataType;
 
   it("should return length of command array", () => {
     expect(commandContainer.length).toBe(3);
@@ -67,11 +59,23 @@ describe("command container", () => {
     );
   });
 
+  it("should return metadata", () => {
+    expect(commandContainer.getCommand("text3", true)).toEqual({
+      commandName: "text_3",
+    });
+  });
+
   it("should return command by command name", () => {
     expect(commandContainer.getCommandByCommandName("text_3")).toHaveProperty(
       "name",
       "text3"
     );
+  });
+
+  it("should return metadata by command name", () => {
+    expect(commandContainer.getCommandByCommandName("text_3", true)).toEqual({
+      commandName: "text_3",
+    });
   });
 
   const mockClb = jest.fn();

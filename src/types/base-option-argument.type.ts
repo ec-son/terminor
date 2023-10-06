@@ -3,18 +3,32 @@ export interface BaseOptionArgumentInterface {
    * @property {string} description description of argument
    */
   description?: string;
+
   /**
    * @property {string} required
    */
   required?: boolean;
+
   /**
    * @property {Array} choices Only allow argument value to be one of choices.
    */
   choices?: any[];
+
   /**
    * @property Set the default value, and optionally supply the description to be displayed in the help.
    */
   default?: any;
+
+  /**
+   * @property Indicates whether it is variadic (accepts multiple values).
+   */
+  variadic?: boolean;
+
+  /**
+   * @property Indicates whether the value should be trimmed.
+   */
+  trim?: boolean;
+
   /**
    * Set the custom validator
    * @param {*} value The value to be validated.
