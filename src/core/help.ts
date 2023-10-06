@@ -30,7 +30,7 @@ export class Help {
   constructor(
     private metadata: MetaDataType,
     private parentCommandNames: string[],
-    private helpConfig?: HelpConfig
+    helpConfig?: HelpConfig
   ) {
     if (helpConfig) {
       for (const key of Object.keys(helpConfig) as Array<keyof HelpConfig>) {

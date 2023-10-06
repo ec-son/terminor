@@ -1,7 +1,7 @@
 import { MetaDataType } from "../types/metadata.type";
 import { commandContainer } from "../utils/command-container";
 import { OptionValueType, VersionType } from "../types/option.type";
-import { TerData, terExit } from "../tools";
+import { terExit } from "../tools";
 import { KsError } from "../exceptions/ks-error";
 import { argumentValidator } from "../utils/argument-validator";
 import { ArgumentValueType } from "../types/argument.type";
@@ -13,8 +13,6 @@ import { checkValueType } from "../utils/check-value-type";
 export class Cli {
   appMetadata: MetaDataType;
   args: Array<string>;
-  // unknownOptions: Array<{ optionName: string; value: string | boolean }> = [];
-  // excessArguments: Array<string> = [];
   isArg: boolean = true;
   configCli: ConfigCli = {
     argv: {
@@ -214,30 +212,6 @@ export class Cli {
       el.treated = true;
     });
 
-    // console.log(metadata.unknownOptions);
-    // console.log(metadata.excessArguments);
-    // console.log(metadata.handlers[0].parameters);
-
-    // if(this.configCli.allowUnknownOption && this.unknownOptions.length > 0)
-
-    // const options: { [key: string]: any } = {};
-    // for (const opt of metadata.options) {
-    //   options[opt.optionName] = opt.value;
-    // }
-
-    // const argums: Array<{ argumentName: string; value: any }> =
-    //   metadata.args.map((arg) => ({
-    //     argumentName: arg.argumentName,
-    //     value: arg.value,
-    //   }));
-
-    // const dataObj = new TerData({
-    //   arguments: argums,
-    //   options,
-    //   excessArguments: this.excessArguments,
-    //   unknownOptions: this.unknownOptions,
-    // });
-
     const preActions = metadata.handlers.filter((el) => el.on === "pre_action");
     actionHandler(preActions, command);
 
@@ -260,31 +234,6 @@ export class Cli {
       (el) => el.on === "post_action"
     );
     actionHandler(postActions, command);
-
-    // console.log(metadata.handlers[0].parameters[0]);
-    // console.log(getParameters(metadata.handlers[0].parameters));
-
-    // if (command["handler"]) command["handler"](dataObj);
-
-    // console.log("--------------- finished processing ------------------");
-
-    // console.log(
-    //   "options:",
-    //   metadata.options.map((el) => ({ [el.optionName]: el.value }))
-    // );
-
-    // console.log(
-    //   "arguments:",
-    //   metadata.args.map((el) => ({ [el.argumentName]: el.value }))
-    // );
-
-    // if (this.unknownOptions.length > 0)
-    //   console.log("unknownOptions:", this.unknownOptions);
-
-    // if (this.excessArguments.length > 0)
-    //   console.log("excessArguments:", this.excessArguments);
-
-    // execute the command
   }
 
   private optionHandler(
