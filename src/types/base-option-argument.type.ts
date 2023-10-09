@@ -1,31 +1,31 @@
 export interface BaseOptionArgumentInterface {
   /**
-   * @property {string} description description of argument
+   * Description of the argument.
    */
   description?: string;
 
   /**
-   * @property {string} required
+   * Indicates whether the argument is required.
    */
   required?: boolean;
 
   /**
-   * @property {Array} choices Only allow argument value to be one of choices.
+   * Only allow the argument value to be one of the choices.
    */
   choices?: any[];
 
   /**
-   * @property Set the default value, and optionally supply the description to be displayed in the help.
+   * Set the default value, and optionally supply the description to be displayed in the help.
    */
   default?: any;
 
   /**
-   * @property Indicates whether it is variadic (accepts multiple values).
+   * Indicates whether the argument accepts multiple values.
    */
   variadic?: boolean;
 
   /**
-   * @property Indicates whether the value should be trimmed.
+   * Indicates whether the value should be trimmed.
    */
   trim?: boolean;
 
@@ -36,18 +36,20 @@ export interface BaseOptionArgumentInterface {
    * @returns {boolean|void} Returns boolean value indicating the validation value. If the result is false, the program will be exited.
    */
   validator?: (value: any, validator: () => void) => boolean | void;
+
   /**
    * Set the custom transform
-   * @param value The value to be
+   * @param value The value to be transformed.
    * @param transform Calls the built-in transform function
    * @returns Returns transformed value
    */
   transform?: (value: any, transform: () => any) => any;
+
   /**
-   *
-   * @param value
-   * @param {string} errorType Error type
-   * @returns {string | void} Returns error message.
+   * Handles errors that occur during validation.
+   * @param value The value that caused the error.
+   * @param {string} errorType The type of error that occurred.
+   * @returns {string | void} Returns an error message.
    * @example
    * // You can use console.log() and call terExit() function to terminate the program.
    *   onError(value, errorType) {
@@ -57,9 +59,12 @@ export interface BaseOptionArgumentInterface {
    *    }
    *   },
    */
-  onError?: (value: any, errorType: ErrorArgType) => string | void; //
+  onError?: (value: any, errorType: ErrorArgType) => string | void;
 }
 
+/**
+ * Represents the types of errors that can occur during validation.
+ */
 type ErrorArgType =
   | "InvalidTypeError"
   | "InvalidChoiceError"

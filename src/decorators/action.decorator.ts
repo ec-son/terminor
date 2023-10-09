@@ -90,6 +90,9 @@ export function Handler(
   type?: "option" | "argument"
 );
 export function Handler(
+  /**
+   * The name of an argument or option. When provided, the handler will be called.
+   */
   trigger?: string | string[],
   type: "option" | "argument" = "option"
 ) {

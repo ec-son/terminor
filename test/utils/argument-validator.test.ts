@@ -27,7 +27,7 @@ describe("argument validation and transform", () => {
   ];
 
   it.each(table1)(
-    "should a valid value",
+    "should return a valid value",
     ({ value, type, transform, expected }) => {
       if (type === "number")
         expect(
@@ -103,9 +103,47 @@ describe("argument validation and transform", () => {
     }
   );
 
-  // it("should treat default values", () => {
-  //   expect(
-  //     transformDefaultValue({ type: "date", default: "2000/3/5" })
-  //   ).toEqual(new Date("2000/3/5"));
-  // });
+  it("should return argument.value if argument.treated is true", () => {
+    const value = "test";
+    const argument: any = {
+      treated: true,
+      value: "test value",
+    };
+    const result = argumentValidator(
+      value,
+      argument as unknown as ArgumentValueType
+    );
+    expect(result).toBe(argument.value);
+  });
+
+  it("should return boolean value if argument.flag is true and argument.type is boolean", () => {
+    const value = "true";
+    const argument: any = {
+      flag: true,
+      type: "boolean",
+    };
+    const result = argumentValidator(value, argument);
+    expect(result).toBe(true);
+  });
+
+  it("should trim the value if argument.trim is true", () => {
+    const value = "   test   ";
+    const argument: ArgumentValueType = {
+      value,
+      argumentName: "text",
+      type: "string",
+      trim: true,
+    };
+    const result = argumentValidator(value, argument);
+    expect(result).toBe("test");
+  });
+
+  it("should return argument.default if value is empty and argument.default exists", () => {
+    const value = "";
+    const argument: any = {
+      default: "default value",
+    };
+    const result = argumentValidator(value, argument);
+    expect(result).toBe(argument.default);
+  });
 });
