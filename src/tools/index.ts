@@ -1,2 +1,2 @@
 export * from "./ter-exit";
-export * from "./terData";
+// export * from "./terData";

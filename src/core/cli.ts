@@ -11,10 +11,10 @@ import { Help } from "./help";
 import { checkValueType } from "../utils/check-value-type";
 
 export class Cli {
-  appMetadata: MetaDataType;
-  args: Array<string>;
-  isArg: boolean = true;
-  configCli: ConfigCli = {
+  private appMetadata: MetaDataType;
+  private args: Array<string>;
+  private isArg: boolean = true;
+  private configCli: ConfigCli = {
     argv: {
       data: process.argv.slice(),
     },
@@ -23,7 +23,7 @@ export class Cli {
     showSuggestionForUnknownCommand: true,
     showSuggestionForUnknownOption: true,
   };
-  commands: string[] = [];
+  private commands: string[] = [];
 
   constructor(AppComponent: any) {
     const commandInstance = new AppComponent();
@@ -88,12 +88,12 @@ export class Cli {
         (opt) => opt.flag === args[0] || opt.alias === args[0]
       );
 
-      if (index >= 0)
+      if (index >= 0) {
         return this.process(
           this.optionHandler(metadata.options[index], args, command),
           metadata
         );
-      else {
+      } else {
         // sub command
         if (
           !this.commands.includes("--finished--") &&
@@ -263,8 +263,8 @@ export class Cli {
 
     if (opt.variadic) [opt.value, args] = getValueForVariadic(opt, args);
     else {
+      opt.value = argumentValidator(args[0], opt);
       args.shift(); // Removes value of option
-      opt.value = argumentValidator(args[1], opt);
     }
 
     command[opt.optionName] = opt.value;

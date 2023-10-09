@@ -1,4 +1,3 @@
-import { KsError } from "../exceptions/ks-error";
 import { ArgumentValueType } from "../types/argument.type";
 import { EventType } from "../types/config-cli.type";
 import { MetaDataType } from "../types/metadata.type";
@@ -27,9 +26,9 @@ function actionDecorator(context: {
           if (!Array.isArray(context.trigger))
             context.trigger = [context.trigger!];
 
-          for (const trigger of context.trigger) {
-            const flag = context.type === "argument" ? "args" : "options";
+          const flag = context.type === "argument" ? "args" : "options";
 
+          for (const trigger of context.trigger) {
             let argOpt: OptionValueType | ArgumentValueType | undefined =
               metadata[flag].find((el) => {
                 const _name = el["argumentName"]
@@ -92,14 +91,8 @@ export function Handler(
 );
 export function Handler(
   trigger?: string | string[],
-  type?: "option" | "argument"
+  type: "option" | "argument" = "option"
 ) {
-  if (trigger && !type)
-    throw new KsError(
-      "Sunt voluptate labore veniam culpa exercitation sint veniam.",
-      {}
-    ); //todo faire ca
-
   return actionDecorator(
     trigger ? { on: type!, trigger, type } : { on: "handler" }
   );
