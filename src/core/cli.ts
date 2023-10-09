@@ -11,10 +11,10 @@ import { Help } from "./help";
 import { checkValueType } from "../utils/check-value-type";
 
 export class Cli {
-  appMetadata: MetaDataType;
-  args: Array<string>;
-  isArg: boolean = true;
-  configCli: ConfigCli = {
+  private appMetadata: MetaDataType;
+  private args: Array<string>;
+  private isArg: boolean = true;
+  private configCli: ConfigCli = {
     argv: {
       data: process.argv.slice(),
     },
@@ -23,7 +23,7 @@ export class Cli {
     showSuggestionForUnknownCommand: true,
     showSuggestionForUnknownOption: true,
   };
-  commands: string[] = [];
+  private commands: string[] = [];
 
   constructor(AppComponent: any) {
     const commandInstance = new AppComponent();
@@ -88,12 +88,12 @@ export class Cli {
         (opt) => opt.flag === args[0] || opt.alias === args[0]
       );
 
-      if (index >= 0)
+      if (index >= 0) {
         return this.process(
           this.optionHandler(metadata.options[index], args, command),
           metadata
         );
-      else {
+      } else {
         // sub command
         if (
           !this.commands.includes("--finished--") &&
@@ -210,6 +210,10 @@ export class Cli {
       el.value = argumentValidator(undefined, el);
       if (el.value === undefined && el.variadic) el.value = [];
       el.treated = true;
+
+      if ("optionName" in el) {
+        command[el.propertyName] = el.value;
+      }
     });
 
     const preActions = metadata.handlers.filter((el) => el.on === "pre_action");
@@ -218,7 +222,7 @@ export class Cli {
     const onArgOpt = metadata.handlers.filter((el) => {
       if (el.on === "argument" || el.on === "option") {
         const flag = el.on === "argument" ? "args" : "options";
-        return metadata[flag].find((e) => {
+        return (metadata[flag] as any).find((e) => {
           const _name = e["argumentName"] ? e["argumentName"] : e["optionName"];
           return _name === el.trigger && typeof e.value !== "undefined";
         });
@@ -243,7 +247,7 @@ export class Cli {
   ): Array<string> {
     if (opt.type === "boolean") {
       opt.value = true;
-      command[opt.optionName] = true;
+      command[opt.propertyName] = true;
       opt.treated = true;
       args.shift();
       return args;
@@ -263,11 +267,11 @@ export class Cli {
 
     if (opt.variadic) [opt.value, args] = getValueForVariadic(opt, args);
     else {
+      opt.value = argumentValidator(args[0], opt);
       args.shift(); // Removes value of option
-      opt.value = argumentValidator(args[1], opt);
     }
 
-    command[opt.optionName] = opt.value;
+    command[opt.propertyName] = opt.value;
     opt.treated = true;
     return args;
   }

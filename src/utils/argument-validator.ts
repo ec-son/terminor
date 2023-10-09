@@ -22,7 +22,8 @@ export function argumentValidator(
   if (argument.trim) value = value?.trim();
 
   if (!value) {
-    if (argument.default) return argument.default;
+    if (argument.default)
+      return argument.variadic ? [argument.default] : argument.default;
     if (argument.required)
       throw new KsError(
         (argument.onError && argument.onError(value, "MissingValueError")) ||
@@ -50,16 +51,6 @@ export function argumentValidator(
     });
   } else return transform(value, argument.type);
 }
-
-// export function transformDefaultValue(
-//   argument: BaseOptionArgumentInterface & { type: ValidType }
-// ) {
-//   if (argument.transform) {
-//     return argument.transform(argument.default, () => {
-//       return transform(argument.default, argument.type);
-//     });
-//   } else return transform(argument.default, argument.type);
-// }
 
 function validator(
   value: any,

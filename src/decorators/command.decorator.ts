@@ -1,5 +1,5 @@
 import { CommandType } from "../types/command.type";
-import { commandInit } from "../utils/command-init";
+import { checkingSubCommand, commandInit } from "../utils/command-init";
 
 export function Command(context: CommandType) {
   return function (target: Function) {
@@ -12,6 +12,7 @@ export function Command(context: CommandType) {
       context.requiredArgsFirst ??= config?.globalRequiredArgsFirst;
 
       const { metadata, index } = commandInit(target.name, context);
+      metadata.subCommandNames = checkingSubCommand(metadata.subCommandNames);
       this[index as any] = metadata;
 
       originalInitFunction.call(this);

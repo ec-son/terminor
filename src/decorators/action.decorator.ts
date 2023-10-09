@@ -1,4 +1,3 @@
-import { KsError } from "../exceptions/ks-error";
 import { ArgumentValueType } from "../types/argument.type";
 import { EventType } from "../types/config-cli.type";
 import { MetaDataType } from "../types/metadata.type";
@@ -12,8 +11,8 @@ function actionDecorator(context: {
 }) {
   return function (
     target: any,
-    methodKey: string,
-    descriptor: PropertyDescriptor
+    methodKey: string
+    // descriptor: PropertyDescriptor
   ) {
     const originalInitFunction: Function = target.__init__ || function () {};
     target.__init__ = function () {
@@ -27,17 +26,18 @@ function actionDecorator(context: {
           if (!Array.isArray(context.trigger))
             context.trigger = [context.trigger!];
 
+          const flag = context.type === "argument" ? "args" : "options";
+
           for (const trigger of context.trigger) {
-            const flag = context.type === "argument" ? "args" : "options";
+            let argOpt: OptionValueType | ArgumentValueType | undefined = (
+              metadata[flag] as any
+            ).find((el) => {
+              const _name = el["argumentName"]
+                ? el["argumentName"]
+                : el["optionName"];
 
-            let argOpt: OptionValueType | ArgumentValueType | undefined =
-              metadata[flag].find((el) => {
-                const _name = el["argumentName"]
-                  ? el["argumentName"]
-                  : el["optionName"];
-
-                return _name === trigger;
-              });
+              return _name === trigger;
+            });
 
             metadata.handlers.push({
               methodKey,
@@ -74,7 +74,10 @@ function actionDecorator(context: {
 
         if (
           context.on === "handler" &&
-          metadata.handlers[0].methodKey === "handler"
+          metadata.handlers.find(
+            (handler) =>
+              handler.methodKey === "handler" && handler.isFirstHandler
+          )
         )
           metadata.handlers.shift();
         metadata.handlers.push(handler);
@@ -91,15 +94,12 @@ export function Handler(
   type?: "option" | "argument"
 );
 export function Handler(
+  /**
+   * The name of an argument or option. When provided, the handler will be called.
+   */
   trigger?: string | string[],
-  type?: "option" | "argument"
+  type: "option" | "argument" = "option"
 ) {
-  if (trigger && !type)
-    throw new KsError(
-      "Sunt voluptate labore veniam culpa exercitation sint veniam.",
-      {}
-    ); //todo faire ca
-
   return actionDecorator(
     trigger ? { on: type!, trigger, type } : { on: "handler" }
   );

@@ -13,10 +13,10 @@ type OptionDescType = Array<{
 }>;
 
 export class Help {
-  private isChangedItemWidth: boolean = false;
+  private isChangedTermWidth: boolean = false;
 
   private windowSize: number = process.stdout.getWindowSize()[0];
-  private itemWidth: number = 30;
+  private termWidth: number = 30;
   private itemIndentWidth = 2;
   private itemSeparatorWidth = 2;
 
@@ -48,7 +48,7 @@ export class Help {
             break;
           }
 
-          if (key === "itemWidth") this.isChangedItemWidth = true;
+          if (key === "termWidth") this.isChangedTermWidth = true;
           this[key] = helpConfig[key]!;
         }
       }
@@ -56,9 +56,9 @@ export class Help {
   }
 
   private width() {
-    const itemWidth = Math.floor((this.itemWidth * this.windowSize) / 100);
-    const desc = this.windowSize - itemWidth;
-    return [itemWidth, desc];
+    const termWidth = Math.floor((this.termWidth * this.windowSize) / 100);
+    const desc = this.windowSize - termWidth;
+    return [termWidth, desc];
   }
 
   private splitText(str: string, limit: number, isItem?: boolean): string[] {
@@ -87,15 +87,15 @@ export class Help {
 
   private formatItem(item: string, desc?: string, isFlag?: boolean): string {
     desc = desc || "";
-    let [itemWidth, descWith] = this.width();
+    let [termWidth, descWith] = this.width();
 
-    const itemWidthText =
-      itemWidth - (this.itemSeparatorWidth + this.itemIndentWidth);
+    const termWidthText =
+      termWidth - (this.itemSeparatorWidth + this.itemIndentWidth);
 
-    const itemSplit = this.splitText(item, itemWidthText, true).map(
+    const itemSplit = this.splitText(item, termWidthText, true).map(
       (str) =>
         " ".padEnd(this.itemIndentWidth) +
-        str.padEnd(itemWidthText + this.itemSeparatorWidth)
+        str.padEnd(termWidthText + this.itemSeparatorWidth)
     );
     const descSplit = this.splitText(desc, descWith);
 
@@ -127,7 +127,7 @@ export class Help {
         else str += itemSplit[i] + "\n";
       } else {
         if (itemSplit.length > i) str += itemSplit[i] + descSplit[i] + "\n";
-        else str += " ".repeat(itemWidth) + descSplit[i] + "\n";
+        else str += " ".repeat(termWidth) + descSplit[i] + "\n";
       }
     }
     str = str.replace(/\s+$/, "");
@@ -289,7 +289,7 @@ export class Help {
     }
 
     // when item width is not provided
-    if (!this.isChangedItemWidth) {
+    if (!this.isChangedTermWidth) {
       let longItem =
         (
           [
@@ -297,15 +297,15 @@ export class Help {
             ...this.metadata.options.map((opt) => this.formatFlag(opt)),
             ...this.metadata.args.map((arg) => arg.argumentName),
           ] as string[]
-        ).reduce((prev, curr) => (curr.length > prev.length ? curr : prev))
+        ).reduce((prev, curr) => (curr.length > prev.length ? curr : prev), " ")
           .length +
         1 +
         this.itemSeparatorWidth +
         this.itemIndentWidth;
 
       longItem = Math.floor((longItem * 100) / this.windowSize);
-      if (longItem < this.itemWidth)
-        this.itemWidth = longItem > 10 ? longItem : 10;
+      if (longItem < this.termWidth)
+        this.termWidth = longItem > 10 ? longItem : 10;
     }
 
     // Arguments

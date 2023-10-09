@@ -14,22 +14,6 @@ export function choiceVerifing(
     )
       break;
     throwException(value, flag, commandName, valueType);
-    // if(valueType === 'date' && !(value instanceof Date))
-    // if (valueType === "number") {
-    //   if (typeof value !== "number")
-    //     throwException(value, flag, commandName, "number");
-    // } else if (valueType === "boolean") {
-    //   if (typeof value !== "boolean")
-    //     throwException(value, flag, commandName, "boolean");
-    // } else if (valueType === "date") {
-    //   if (!(value instanceof Date))
-    //     throwException(value, flag, commandName, "Date");
-    // } else if (valueType === "string") {
-    //   if (typeof value !== "string")
-    //     throwException(value, flag, commandName, "string");
-    // } else {
-    //   throwException(value, flag, commandName);
-    // }
   }
 }
 

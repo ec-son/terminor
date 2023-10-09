@@ -21,10 +21,3 @@ export function checkValueType(type: ValidType, value: any, isSys?: boolean) {
   }
   return typeof value === type;
 }
-
-// export function getValueType(type: ValidType) {
-//   if (type === Number) return "number";
-//   else if (type === Boolean) return "boolean";
-//   else if (type === Date) return "date";
-//   else return "string";
-// }

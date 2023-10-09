@@ -1,7 +1,7 @@
-import { TerData } from "../tools/terData";
+// import { TerData } from "../tools/terData";
 
-export interface TerCommand {
-  init?(): void;
-  handler(dataObj: TerData): void;
-  postAction?(): void;
-}
+// export interface TerCommand {
+//   init?(): void;
+//   handler(dataObj: TerData): void;
+//   postAction?(): void;
+// }

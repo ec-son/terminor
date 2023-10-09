@@ -58,6 +58,7 @@ export function commandInit(
         methodKey: "handler",
         on: "handler",
         parameters: [],
+        isFirstHandler: true,
       },
     ],
     options: [],
@@ -68,4 +69,14 @@ export function commandInit(
   };
 
   return { metadata, index };
+}
+
+export function checkingSubCommand(subCommandNames: string[]) {
+  const commandNames: string[] = [];
+  for (const subCommandName of subCommandNames) {
+    if (commandContainer.getCommandByCommandName(subCommandName))
+      commandNames.push(subCommandName);
+  }
+
+  return commandNames;
 }

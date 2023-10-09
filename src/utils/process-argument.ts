@@ -9,14 +9,14 @@ export const processArgument = (
 ): Array<ArgumentType> => {
   if (!args?.length) args = [];
   for (const argument of args) {
+    if (!argument.type) argument.type = "string";
+
     choiceVerifing(
       argument.type,
       argument.choices || [],
       "choice",
       commandName
     );
-
-    if (!argument.type) argument.type = "string";
 
     if (argument.type === "date") {
       const dateDesc =

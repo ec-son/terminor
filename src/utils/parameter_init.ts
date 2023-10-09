@@ -37,7 +37,8 @@ export function parameterInit(
           ? el.argumentName === argumentName
           : el.optionName === argumentName;
       });
-      if (!_arg) return;
+      if (!_arg) arg.argOpt = undefined;
+      // if (!_arg) return;
       arg.argOpt = _arg;
     } else {
       if (flag === "args" || flag === "options") arg.argOpt = metadata[flag];
