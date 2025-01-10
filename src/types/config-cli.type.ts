@@ -74,6 +74,17 @@ export type ConfigCli = {
    */
 
   helpConfig?: HelpConfig;
+
+  /**
+   * Error message
+   */
+
+  error?:
+    | {
+        displayErrorMessage?: boolean;
+        displayErrorType?: boolean;
+      }
+    | boolean;
 };
 
 export type HelpConfig = {

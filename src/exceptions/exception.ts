@@ -1,3 +1,4 @@
+import { ConfigCli } from "../types/config-cli.type";
 import { KsError } from "./ks-error";
 import { underline, redBright, gray, cyan } from "ansi-colors";
 export default () => {
@@ -34,7 +35,34 @@ function throwException(
   message: string,
   opt?: any
 ): void {
-  console.log("\n" + redBright(underline(`${flag}:`)), gray(typeError), "\n");
-  console.log(message);
-  if (opt.commandName) console.log(`\nIn the ${cyan(opt.commandName)} class.`);
+  if (opt.commandName) {
+    console.log("\n" + redBright(underline(`${flag}:`)), gray(typeError), "\n");
+    console.log(message);
+    console.log(`\nIn the ${cyan(opt.commandName)} class.`);
+  } else {
+    const configCli = JSON.parse(
+      (process.env as any).TERMINOR_CONFIG_CLI
+    ) as ConfigCli;
+    if (typeof configCli.error === "boolean" && !configCli.error) return;
+
+    if (
+      !configCli.error ||
+      configCli.error === true ||
+      configCli.error.displayErrorType === undefined ||
+      configCli.error.displayErrorType
+    )
+      console.log(
+        "\n" + redBright(underline(`${flag}:`)),
+        gray(typeError),
+        "\n"
+      );
+
+    if (
+      !configCli.error ||
+      configCli.error === true ||
+      configCli.error.displayErrorMessage === undefined ||
+      configCli.error.displayErrorMessage
+    )
+      console.log(message);
+  }
 }

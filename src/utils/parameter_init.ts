@@ -8,7 +8,7 @@ export function parameterInit(
   target: Object,
   propertyKey: string | symbol,
   parameterIndex: number,
-  argumentName?: string
+  argumentName?: string | string[]
 ) {
   const originalInitFunction: Function =
     target["__init__parameter__"] || function () {};
@@ -32,14 +32,24 @@ export function parameterInit(
     } = { index: parameterIndex, flag };
 
     if (argumentName) {
-      const _arg = (metadata[flag] as any).find((el) => {
-        return "argumentName" in el
-          ? el.argumentName === argumentName
-          : el.optionName === argumentName;
-      });
-      if (!_arg) arg.argOpt = undefined;
-      // if (!_arg) return;
-      arg.argOpt = _arg;
+      if (Array.isArray(argumentName)) {
+        const _arg: any[] = [];
+        let __arg: any;
+        for (const element of argumentName) {
+          __arg = (metadata[flag] as any).find((el) => {
+            return [el.argumentName, el.optionName].includes(element);
+          });
+          if (__arg) _arg.push(__arg);
+        }
+
+        arg.argOpt = _arg;
+      } else {
+        const _arg = (metadata[flag] as any).find((el) => {
+          return [el.argumentName, el.optionName].includes(argumentName);
+        });
+        if (!_arg) arg.argOpt = undefined;
+        arg.argOpt = _arg;
+      }
     } else {
       if (flag === "args" || flag === "options") arg.argOpt = metadata[flag];
       else {

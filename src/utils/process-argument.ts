@@ -2,6 +2,7 @@ import { KsError } from "../exceptions/ks-error";
 import { choiceVerifing } from "./choice-verification";
 import { ArgumentType } from "../types/argument.type";
 import { isEqual } from "./is-equal";
+import { green } from "ansi-colors";
 
 export const processArgument = (
   args: Array<ArgumentType> | undefined,
@@ -33,7 +34,9 @@ export const processArgument = (
         !argument.choices.find((el) => isEqual(el, argument.default))
       ) {
         throw new KsError(
-          `The default value provided is not valid according to the available choices. Valid choices are: ${argument.choices
+          `The default value provided ${green(
+            "'" + argument.argumentName + "'"
+          )} is not valid according to the available choices. Valid choices are: ${argument.choices
             .map((el) => JSON.stringify(el))
             .join(", ")}`,
           {

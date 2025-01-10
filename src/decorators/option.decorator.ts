@@ -6,6 +6,7 @@ import { formatOptionFlag } from "../utils/format-option-flag";
 import { MetaDataType } from "../types/metadata.type";
 import { isEqual } from "../utils/is-equal";
 import { ValidType } from "../types/valid.type";
+import { green } from "ansi-colors";
 
 export function Option(
   _opt?: Omit<OptionType, "type" | "optionName"> &
@@ -60,7 +61,9 @@ export function Option(
           !option.choices.find((el) => isEqual(el, option.default))
         ) {
           throw new KsError(
-            `The default value provided is not valid according to the available choices. Valid choices are: ${option.choices
+            `The default value provided for ${green(
+              "'" + option.optionName + "'"
+            )} is not valid according to the available choices. Valid choices are: ${option.choices
               .map((el) => JSON.stringify(el))
               .join(", ")}`,
             {

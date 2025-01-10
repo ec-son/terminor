@@ -1,6 +1,6 @@
 import { parameterInit } from "../utils/parameter_init";
 
-export function ArgumentData(argumentName?: string) {
+export function ArgumentData(argumentName?: string | string[]) {
   return function (
     target: Object,
     propertyKey: string | symbol,

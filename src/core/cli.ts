@@ -46,6 +46,7 @@ export class Cli {
     for (const key of Object.keys(configCli || {})) {
       this.configCli[key] = configCli![key];
     }
+    (process.env as any).TERMINOR_CONFIG_CLI = JSON.stringify(this.configCli);
 
     this.args =
       this.configCli!.argv!.from === "user"
