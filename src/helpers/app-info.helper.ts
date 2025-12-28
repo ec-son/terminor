@@ -8,7 +8,11 @@ export const appInfo = (
   if (!existsSync(pathPackage)) return undefined;
   else if (!statSync(pathPackage).isFile()) return undefined;
 
-  const packageJsonContents = readFileSync(pathPackage).toString();
-  const packageJson = JSON.parse(packageJsonContents);
-  return packageJson[flag] || undefined;
+  try {
+    const packageJsonContents = readFileSync(pathPackage).toString();
+    const packageJson = JSON.parse(packageJsonContents);
+    return packageJson[flag] || undefined;
+  } catch (error) {
+    return undefined;
+  }
 };

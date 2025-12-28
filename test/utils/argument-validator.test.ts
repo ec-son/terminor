@@ -54,7 +54,7 @@ describe("argument validation and transform", () => {
       },
     });
 
-    expect(mockTerExit).toBeCalled();
+    expect(mockTerExit).toHaveBeenCalled();
   });
 
   const table2 = [
