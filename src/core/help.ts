@@ -333,11 +333,3 @@ export class Help {
     process.stdout.write(this.formatHelp().join("\n"));
   }
 }
-
-/**
- Pour rappel, ce groupe terroriste, suppletif du Rwanda, ne respecte aucun des angaggements conclus par les chefs
- d'Etat de la region dans les cadres des processus de Luanda et de Nairobi. En effet, non seulement ils n'ont pas 
- quitte leurs positions conquises, mais ils continuent a massacrer nos populations civilles et et refusent les 
- precantonnement et le precantonnement exigent un dialogue qui ne leur sera jamais accorde.  
-
- */
