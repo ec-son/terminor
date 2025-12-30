@@ -282,6 +282,9 @@ describe("Cli", () => {
       }
       const cli = new Cli(DummyApp as any) as any;
 
+      // Mock process.stdout.getWindowSize for Help constructor
+      (process.stdout as any).getWindowSize = jest.fn(() => [120, 40]);
+
       const helpDisplaySpy = jest.spyOn(require("../../src/core/help").Help.prototype, "display").mockImplementation(() => {});
       const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 

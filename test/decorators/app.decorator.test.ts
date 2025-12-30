@@ -102,4 +102,64 @@ describe("App decorator", () => {
     expect(md.version.flag).toBe("--ver");
     expect(md.version.description).toBe("custom");
   });
+
+  it("should disable version when versionOption is false", () => {
+    const index = Symbol("idx3");
+    const metadata = {
+      commandName: "mycmd3",
+      subCommandNames: [],
+      options: [],
+      args: [],
+      handlers: [],
+      unknownOptions: [],
+      excessArguments: [],
+    } as any;
+
+    (commandInitModule as any).commandInit = jest.fn().mockReturnValue({
+      metadata,
+      index,
+    });
+
+    (helpers as any).appInfo = jest.fn((key: string) => `app-${key}`);
+
+    @App({ commandName: "mycmd3", versionOption: false })
+    class TestApp3 {}
+
+    const instance: any = new TestApp3();
+    instance.__init__();
+
+    const md = instance[index];
+    expect(md.version.disabled).toBe(true);
+  });
+
+  it("should pass helpOption through context", () => {
+    const index = Symbol("idx4");
+    const metadata = {
+      commandName: "mycmd4",
+      subCommandNames: [],
+      options: [],
+      args: [],
+      handlers: [],
+      unknownOptions: [],
+      excessArguments: [],
+    } as any;
+
+    (commandInitModule as any).commandInit = jest.fn().mockReturnValue({
+      metadata,
+      index,
+    });
+
+    (helpers as any).appInfo = jest.fn((key: string) => `app-${key}`);
+
+    @App({ commandName: "mycmd4", helpOption: { flag: "--assist", alias: "-a" } })
+    class TestApp4 {}
+
+    const instance: any = new TestApp4();
+    instance.__init__();
+
+    // commandInit should have been called with helpOption in context
+    const callArgs = (commandInitModule as any).commandInit.mock.calls;
+    const lastCall = callArgs[callArgs.length - 1][1];
+    expect(lastCall.helpOption).toEqual({ flag: "--assist", alias: "-a" });
+  });
 });

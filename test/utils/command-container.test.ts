@@ -31,7 +31,7 @@ describe("command container", () => {
   commandContainer.setCommand(command1);
   commandContainer.setCommand(command2);
 
-  mockFunction[command2.index] = { commandName: "text_3" } as MetaDataType;
+  (mockFunction as any)[command2.index] = { commandName: "text_3" } as MetaDataType;
 
   it("should return length of command array", () => {
     expect(commandContainer.length).toBe(3);
