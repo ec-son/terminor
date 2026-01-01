@@ -59,13 +59,8 @@ export interface BaseOptionArgumentInterface {
    *    }
    *   },
    */
-  onError?: (value: any, errorType: ErrorArgType) => string | void;
+  onError?: (
+    value: any,
+    errorType: "InvalidTypeError" | "InvalidChoiceError" | "MissingValueError"
+  ) => string | void;
 }
-
-/**
- * Represents the types of errors that can occur during validation.
- */
-type ErrorArgType =
-  | "InvalidTypeError"
-  | "InvalidChoiceError"
-  | "MissingValueError";
