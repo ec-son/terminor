@@ -49,7 +49,12 @@ describe("App decorator", () => {
       __init__ = jest.fn();
     }
 
-    @App({ commands: [SubCommand], commandName: "mycmd", versionOption: false, globalRequiredArgsFirst: true })
+    @App({
+      commands: [SubCommand],
+      commandName: "mycmd",
+      versionOption: false,
+      globalRequiredArgsFirst: true,
+    })
     class TestApp {}
 
     const instance: any = new TestApp();
@@ -62,13 +67,62 @@ describe("App decorator", () => {
 
     // commandContainer.setCommand should be called for the subcommand
     expect((commandContainer as any).setCommand).toHaveBeenCalled();
+    expect(
+      Object.keys(
+        ((commandContainer as any).setCommand as jest.Mock).mock.calls[0][0]
+      ).length
+    ).toBe(3);
+    expect(
+      ((commandContainer as any).setCommand as jest.Mock).mock.calls[0][0].name
+    ).toEqual("SubCommand");
 
     // subcommand __init__ should have been called with globalRequiredArgsFirst option
-    const subInstance = (commandContainer as any).setCommand.mock.calls[0][0].commandInstance;
-    expect(subInstance.__init__).toHaveBeenCalledWith({ globalRequiredArgsFirst: true });
+    const subInstance = (commandContainer as any).setCommand.mock.calls[0][0]
+      .commandInstance;
+    expect(subInstance.__init__).toHaveBeenCalledWith({
+      globalRequiredArgsFirst: true,
+    });
 
     // checkingSubCommand should have been called
-    expect((checkingModule as any).checkingSubCommand).toHaveBeenCalledWith(metadata.subCommandNames);
+    expect((checkingModule as any).checkingSubCommand).toHaveBeenCalledWith(
+      metadata.subCommandNames
+    );
+  });
+
+  it("should set default version option when versionOption is not provided", () => {
+    const index = Symbol("idx3");
+    const metadata = {
+      commandName: "mycmd3",
+      subCommandNames: [],
+      options: [],
+      args: [],
+      handlers: [],
+      unknownOptions: [],
+      excessArguments: [],
+    } as any;
+
+    (commandInitModule as any).commandInit = jest.fn().mockReturnValue({
+      metadata,
+      index,
+    });
+
+    (helpers as any).appInfo = jest.fn((key: string) => `app-${key}`);
+
+    @App({ commandName: "mycmd3" })
+    class TestApp3 {}
+
+    const instance: any = new TestApp3();
+    instance.__init__();
+
+    const md = instance[index];
+    expect(md.version).toEqual({
+      description: "output the version number",
+      disabled: false,
+      showInHelp: true,
+      flag: "--version",
+      alias: "-v",
+      version: "app-version",
+    });
   });
 
   it("should override version options when provided as object", () => {
@@ -90,7 +144,10 @@ describe("App decorator", () => {
 
     (helpers as any).appInfo = jest.fn((key: string) => `app-${key}`);
 
-    @App({ commandName: "mycmd2", versionOption: { flag: "--ver", description: "custom" } })
+    @App({
+      commandName: "mycmd2",
+      versionOption: { flag: "ver", description: "custom" },
+    })
     class TestApp2 {}
 
     const instance: any = new TestApp2();
@@ -151,7 +208,10 @@ describe("App decorator", () => {
 
     (helpers as any).appInfo = jest.fn((key: string) => `app-${key}`);
 
-    @App({ commandName: "mycmd4", helpOption: { flag: "--assist", alias: "-a" } })
+    @App({
+      commandName: "mycmd4",
+      helpOption: { flag: "--assist", alias: "-a" },
+    })
     class TestApp4 {}
 
     const instance: any = new TestApp4();

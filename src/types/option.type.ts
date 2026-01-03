@@ -45,7 +45,7 @@ export type HelpType = {
    */
   disabled?: boolean;
   /**
-   * Show this option on help
+   * Indicates whether help option should be displayed in the --help output
    */
   showInHelp?: boolean;
   /**
@@ -81,7 +81,7 @@ export type VersionType = {
   disabled?: boolean;
 
   /**
-   * Show this option on help
+   * Indicates whether version option should be displayed in the --help output
    */
   showInHelp?: boolean;
 
