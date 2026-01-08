@@ -181,11 +181,11 @@ export class Help {
     description?: string;
   }) {
     const ext: string[] = [];
-    if (el.choices && el.choices.length > 0)
+    if (el.choices && el.choices.length > 0 && this._extraInfo.showChoice)
       ext.push(
         "choices: " + el.choices.map((el) => JSON.stringify(el)).join(", ")
       );
-    if (el.default !== undefined) {
+    if (el.default !== undefined && this._extraInfo.showDefaultValue) {
       ext.push(
         `default: ${
           el.default instanceof Date ? JSON.stringify(el.default) : el.default
@@ -195,7 +195,7 @@ export class Help {
 
     let info: string = ext.join(", ") || "";
     info = info ? ` (${info})` : info;
-    if (el.type) info += ` [${el.type}]`;
+    if (el.type && this._extraInfo.showType) info += ` [${el.type}]`;
 
     let [, descWith] = this.width();
 
@@ -205,7 +205,8 @@ export class Help {
       const newWidth = descWith - descSize;
       info = ext.join(", ") || "";
       info = info ? ` (${info})` : info;
-      if (el.type) info += `${" ".repeat(newWidth)}[${el.type}]`;
+      if (el.type && this._extraInfo.showType)
+        info += `${" ".repeat(newWidth)}[${el.type}]`;
     }
 
     return info;

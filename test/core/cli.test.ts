@@ -119,7 +119,7 @@ describe("Cli", () => {
         argv: {
           data: [
             "/home/ecson/.nvm/versions/node/v24.11.1/bin/node",
-            "/home/ecson/project/terminor/node_modules/.pnpm/jest-worker@29.7.0/node_modules/jest-worker/build/workers/processChild.js",
+            "/home/ecson/project/terminor/node_modules/.pnpm/jest-worker@29.5.0/node_modules/jest-worker/build/workers/processChild.js",
           ],
         },
         showSuggestionForUnknownCommand: true,

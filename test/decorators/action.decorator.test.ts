@@ -43,11 +43,42 @@ describe("Action decorators (Handler, PreAction, PostAction)", () => {
     );
   });
 
+  it("should call default handler method", () => {
+    class TestCmd {
+      __init__() {
+        (this as any)[metaIndex as any] = mockMetadata;
+      }
+      handler() {
+        console.log("handling");
+      }
+    }
+
+    const inst = new TestCmd();
+    (inst as any).__init__();
+
+    const handlers = mockMetadata.handlers.filter(
+      (h) => h.methodKey === "handler"
+    );
+
+    expect(handlers.length).toBeGreaterThan(0);
+    expect(handlers[0].on).toBe("handler");
+    expect(handlers).toEqual([
+      {
+        methodKey: "handler",
+        on: "handler",
+        parameters: [],
+        isFirstHandler: true,
+      },
+    ]);
+  });
+
   it("Handler decorator without trigger should replace default handler", () => {
     class TestCmd {
       __init__() {
         (this as any)[metaIndex as any] = mockMetadata;
       }
+
+      handler() {}
 
       @((Handler as any)())
       handle() {
@@ -61,8 +92,10 @@ describe("Action decorators (Handler, PreAction, PostAction)", () => {
     const handlers = mockMetadata.handlers.filter(
       (h) => h.methodKey === "handle"
     );
+
     expect(handlers.length).toBeGreaterThan(0);
     expect(handlers[0].on).toBe("handler");
+    expect(handlers[0].methodKey).toBe("handle");
   });
 
   it("Handler decorator with trigger should add handler with trigger", () => {
@@ -86,7 +119,6 @@ describe("Action decorators (Handler, PreAction, PostAction)", () => {
       ).__init__parameter__?.();
     };
     (inst as any).__init__();
-
     // Handler with trigger is added via __init__parameter__
     // which requires options/args to exist in metadata
     expect(mockMetadata.handlers.length).toBeGreaterThan(0);

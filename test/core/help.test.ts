@@ -501,6 +501,24 @@ describe("Help", () => {
       );
     });
 
+    it("should not include extra info", () => {
+      const helpInstance = new Help(
+        {
+          ...mockMetadata,
+          help: { ...mockMetadata.help!, alias: "hel" },
+        },
+        ["app"],
+        { extraInfo: false }
+      );
+      const result = (helpInstance as any).extraInfo({
+        choices: ["a", "b", "c"],
+        default: "a",
+        type: "string",
+        description: "Test",
+      });
+      expect(result).toEqual("");
+    });
+
     it("should return empty string for element without extra info", () => {
       const result = (help as any).extraInfo({
         description: "Test",
