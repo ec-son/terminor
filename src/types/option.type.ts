@@ -45,6 +45,10 @@ export type HelpType = {
    */
   disabled?: boolean;
   /**
+   * Show this option on help
+   */
+  showInHelp?: boolean;
+  /**
    * Additional help text.
    */
   addHelpText?: {
@@ -75,6 +79,11 @@ export type VersionType = {
    * Indicates whether the version type is disabled or not.
    */
   disabled?: boolean;
+
+  /**
+   * Show this option on help
+   */
+  showInHelp?: boolean;
 
   /**
    * A flag associated with the version type.

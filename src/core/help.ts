@@ -14,7 +14,6 @@ type OptionDescType = Array<{
 
 export class Help {
   private isChangedTermWidth: boolean = false;
-
   private windowSize: number = process.stdout.getWindowSize()[0];
   private termWidth: number = 30;
   private itemIndentWidth = 2;
@@ -141,11 +140,11 @@ export class Help {
   }
 
   private hasHelpOption() {
-    return this.metadata.help.disabled;
+    return this.metadata.help.showInHelp && !this.metadata.help.disabled;
   }
 
   private hasHelpVersion() {
-    return this.metadata.version?.disabled;
+    return this.metadata.version?.showInHelp && !this.metadata.version.disabled;
   }
 
   private visibleOptions(): OptionDescType {
@@ -283,7 +282,8 @@ export class Help {
       if (!metadata) continue;
 
       subCommandList.push({
-        subCommandUsage: this.commandUsage(metadata),
+        // subCommandUsage: this.commandUsage(metadata),
+        subCommandUsage: metadata.commandName,
         desc: metadata.description,
       });
     }
@@ -294,7 +294,8 @@ export class Help {
         (
           [
             ...subCommandList.map((el) => el.subCommandUsage),
-            ...this.metadata.options.map((opt) => this.formatFlag(opt)),
+            ...this.visibleOptions().map((opt) => this.formatFlag(opt)),
+            // ...this.metadata.options.map((opt) => this.formatFlag(opt)),
             ...this.metadata.args.map((arg) => arg.argumentName),
           ] as string[]
         ).reduce((prev, curr) => (curr.length > prev.length ? curr : prev), " ")

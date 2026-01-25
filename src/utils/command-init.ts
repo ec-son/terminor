@@ -4,6 +4,7 @@ import { CommandType } from "../types/command.type";
 import { MetaDataType } from "../types/metadata.type";
 import { HelpType } from "../types/option.type";
 import { commandContainer } from "./command-container";
+import { formatOptionFlag } from "./format-option-flag";
 import { processArgument } from "./process-argument";
 
 export function commandInit(
@@ -22,8 +23,9 @@ export function commandInit(
   const help: HelpType = {
     description: "display help for command",
     disabled: false,
-    flag: "--help",
-    alias: "-h",
+    showInHelp: true,
+    flag: "help",
+    alias: "h",
   };
 
   if (context?.helpOption) {
@@ -34,6 +36,10 @@ export function commandInit(
       (help[key] as any) = helpOption[key];
     }
   } else if (typeof context.helpOption === "boolean") help.disabled = true;
+
+  const formatedHelpFlag = formatOptionFlag(help.flag || "help", help.alias);
+  help.flag = formatedHelpFlag.flag;
+  help.alias = formatedHelpFlag.alias;
 
   // sub command names
   const subCommandNames = [...new Set(context?.subCommands)];

@@ -6,6 +6,7 @@ import { AppCommandType } from "../types/app-command.type";
 import { CommandInfoType } from "../types/command-info.type";
 import { checkingSubCommand, commandInit } from "../utils/command-init";
 import { CommandType } from "../types/command.type";
+import { formatOptionFlag } from "../utils/format-option-flag";
 
 export function App(context?: {
   /**
@@ -73,6 +74,7 @@ export function App(context?: {
       const version: VersionType = {
         description: "output the version number",
         disabled: false,
+        showInHelp: true,
         flag: "--version",
         alias: "-v",
         version: appInfo("version"),
@@ -87,6 +89,13 @@ export function App(context?: {
         }
       } else if (typeof context.versionOption === "boolean")
         version.disabled = true;
+
+      const formatedVersionFlag = formatOptionFlag(
+        version.flag || "version",
+        version.alias
+      );
+      version.flag = formatedVersionFlag.flag;
+      version.alias = formatedVersionFlag.alias;
 
       metadata.version = version;
       this[index as any] = metadata;
