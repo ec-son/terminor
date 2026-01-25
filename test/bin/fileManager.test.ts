@@ -107,12 +107,11 @@ export class TestCommand {}
       expect(result).toBe(testFile);
     });
 
-    it("should ignore commandName in comments", () => {
+    it("should ignore commandName outisde of @Command", () => {
       const content = `
-// This has commandName: 'ignored'
+commandName: 'ignored'
 
 @Command({
-  commandName: 'test',
   description: 'Test'
 })
 export class TestCommand {}
@@ -120,7 +119,38 @@ export class TestCommand {}
       fs.writeFileSync(testFile, content);
 
       const result = FileManager.findFileByCommandName(testDir, "test");
-      expect(result).toBe(testFile);
+      expect(result).toBeNull();
+    });
+
+    it("should ignore commandName in comments", () => {
+      const content = `
+
+@Command({
+  //commandName: 'test',
+  description: 'Test'
+})
+export class TestCommand {}
+`;
+      fs.writeFileSync(testFile, content);
+
+      const result = FileManager.findFileByCommandName(testDir, "test");
+      expect(result).toBeNull();
+    });
+
+    it("should ignore @Command in comments", () => {
+      const content = `
+// This has commandName: 'ignored'
+
+/*@Command({
+  commandName: 'test',
+  description: 'Test'
+})*/
+export class TestCommand {}
+`;
+      fs.writeFileSync(testFile, content);
+
+      const result = FileManager.findFileByCommandName(testDir, "test");
+      expect(result).toBeNull();
     });
 
     it("should return null if commandName not found", () => {
@@ -213,6 +243,7 @@ export class TestCommand {}
       const importLines = result
         .split("\n")
         .filter((line) => line.match(/^import\s*{/));
+
       expect(importLines.length).toBe(2);
     });
 

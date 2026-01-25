@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import { FileManager } from "../../src/bin/fileManager";
-import { terExit } from "../../src/tools";
 
 jest.mock("../../src/tools", () => ({
   terExit: jest.fn(() => {
